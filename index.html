@@ -1,96 +1,210 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Salon POS</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
- body{font-family:Arial,sans-serif;margin:0;background:#faf5f7;color:#333}
- .box{max-width:420px;margin:60px auto;background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 10px #0002}
- input,select,button{width:100%;padding:10px;margin:6px 0;box-sizing:border-box;font-size:15px}
- button{background:#b8587a;color:#fff;border:0;border-radius:8px;cursor:pointer}
- #lock{display:none;position:fixed;inset:0;background:#7a1c2e;color:#fff;text-align:center;padding-top:25vh;font-size:26px}
- #pos{display:none;max-width:900px;margin:20px auto;padding:10px}
- .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
- @media(max-width:700px){.grid{grid-template-columns:1fr}}
- .svc{background:#fff;border:1px solid #ddd;padding:10px;margin:4px 0;border-radius:8px;cursor:pointer}
+:root{--dk:#2C1810;--gold:#C9A96E;--bg:#F4EFE8;--cream:#FBF8F3;--b:rgba(0,0,0,.13)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:#1a1a1a}
+input,select,button{font:inherit;padding:9px 11px;border:1.5px solid var(--b);border-radius:10px;background:var(--cream);width:100%;margin:4px 0}
+button{background:var(--dk);color:var(--gold);border:0;cursor:pointer;width:auto;padding:9px 16px}
+button.sm{padding:5px 10px;font-size:12px;margin:2px}
+button.o{background:none;color:var(--dk);border:1.5px solid var(--b)}
+a{color:#8a6a2f}
+h2{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--dk);margin-bottom:12px}
+h3{margin:10px 0 6px;font-size:14px;color:var(--dk)}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--dk);padding:16px}
+.card{background:#fff;border-radius:14px;padding:18px;box-shadow:0 1px 6px #0001;margin-bottom:14px}
+#login .card{max-width:400px;width:100%;padding:28px}
+.logo{font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:3px;color:var(--dk)}
+#lock{display:none;position:fixed;inset:0;z-index:999;background:#7a1c2e;color:#fff;text-align:center;padding-top:25vh;font-size:26px}
+#app{display:none}
+.sb{position:fixed;inset:0 auto 0 0;width:210px;background:var(--dk);display:flex;flex-direction:column;z-index:100;transition:transform .25s}
+.br{padding:20px 18px 12px;border-bottom:1px solid #c9a96e22;font-family:'Cormorant Garamond',serif;font-size:20px;letter-spacing:2px;color:var(--gold)}
+.br small{display:block;font:9px 'DM Sans';letter-spacing:1.5px;opacity:.5;margin-top:3px;text-transform:uppercase}
+#nav{flex:1;overflow-y:auto;padding:6px 0}
+.nl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c9a96e55;padding:12px 18px 3px}
+.ni{padding:8px 18px;color:#ffffff88;cursor:pointer;border-left:2px solid transparent}
+.ni:hover{color:#fff;background:#ffffff0a}
+.ni.on{color:var(--gold);border-left-color:var(--gold)}
+.ft{padding:12px 18px;border-top:1px solid #c9a96e22;color:#c9a96e99;font-size:11px}
+.ft button{margin-top:8px;background:#ffffff12;color:#fff9;padding:5px 12px;font-size:11px}
+.main{margin-left:210px;padding:22px;max-width:1000px}
+.burger{display:none;margin-bottom:10px}
+@media(max-width:800px){.sb{transform:translateX(-100%)}.sb.open{transform:none}.main{margin-left:0;padding:14px}.burger{display:inline-block}}
+.pg{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.grid,.f2{grid-template-columns:1fr!important}}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.svc{background:var(--cream);border:1px solid var(--b);padding:9px 11px;margin:4px 0;border-radius:10px;cursor:pointer}
+.svc:hover{border-color:var(--gold)}
+.line{border-bottom:1px solid var(--b);padding:6px 0}
+table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1px solid var(--b);text-align:left;font-size:13px}
+.tag{font-size:11px;padding:2px 8px;border-radius:20px;background:#E8D5B0}
+.tag.Cancelled{background:#fca5a5}.tag.Confirmed{background:#86efac}
+.err{color:#b91c1c;margin:6px 0}
+.big{font-size:20px;font-weight:500;margin:8px 0}
 </style></head><body>
 
 <div id="lock"><b>Account Suspended</b><br>Contact Administrator</div>
 
-<div class="box" id="login">
- <h2>Salon Sign In</h2>
+<div id="login"><div class="card">
+ <div class="logo">SALON POS</div><p style="font-size:11px;color:#999;letter-spacing:2px;margin-bottom:16px">SIGN IN</p>
  <input id="salonId" placeholder="Salon ID (e.g. SALON001)">
  <input id="email" placeholder="Email">
  <input id="pass" type="password" placeholder="Password">
- <button onclick="signIn()">Sign In</button>
- <p id="msg" style="color:#c00"></p>
-</div>
+ <button onclick="signIn()" style="width:100%">Sign In</button>
+ <p id="msg" class="err"></p>
+</div></div>
 
-<div id="pos">
- <h2>New Sale <small id="who"></small></h2>
- <div class="grid">
-  <div><h3>Services</h3><div id="services"></div></div>
-  <div><h3>Cart</h3><div id="cart"></div>
-   <input id="disc" type="number" placeholder="Discount %" oninput="draw()">
-   <input id="tax" type="number" placeholder="GST / Service charge %" oninput="draw()">
-   <select id="method"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select>
-   <h3 id="total">Total: 0</h3>
-   <button onclick="checkout()">Complete Sale</button>
-  </div>
+<div id="app">
+ <nav class="sb" id="sb">
+  <div class="br">SALON POS<small id="who"></small></div>
+  <div id="nav"></div>
+  <div class="ft"><span id="role"></span><br><button onclick="location.reload()">Sign out</button></div>
+ </nav>
+ <div class="main">
+  <button class="burger" onclick="$('sb').classList.toggle('open')">&#9776; Menu</button>
+
+  <section class="pg" id="p-sale"><h2>New Sale</h2>
+   <div class="grid">
+    <div class="card"><h3>Services</h3><div id="services"></div></div>
+    <div class="card"><h3>Cart</h3><div id="cart"></div>
+     <input id="disc" type="number" placeholder="Discount %" oninput="draw()">
+     <input id="tax" type="number" placeholder="GST / Service charge %" oninput="draw()">
+     <select id="method"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select>
+     <input id="cphone" placeholder="Client WhatsApp number (for receipt, optional)">
+     <div class="big" id="total">Total: 0</div>
+     <button onclick="checkout()">Complete Sale</button>
+     <div id="done"></div>
+    </div>
+   </div>
+  </section>
+
+  <section class="pg" id="p-appt"><h2>Appointments</h2>
+   <div class="card"><div class="f2">
+    <div>Date<input id="ad" type="date"></div><div>Time<input id="at" type="time"></div>
+    <div>Minutes<input id="am" type="number" value="60"></div><div>Status<select id="as"><option>Confirmed</option><option>Pending</option></select></div>
+    <div>Client<input id="ac" placeholder="Client name"></div><div>WhatsApp number<input id="ap" placeholder="03xx xxxxxxx"></div>
+    <div>Service<select id="asv"></select></div><div>Specialist<select id="ast"></select></div>
+   </div><button onclick="bookAppt()">Book Appointment</button><p id="aerr" class="err"></p></div>
+   <div class="card" style="overflow-x:auto"><div id="alist"></div></div>
+  </section>
+
+  <section class="pg" id="p-comm"><h2>Staff &amp; Commissions</h2>
+   <div class="card"><div class="f2"><div>From<input id="cf" type="date"></div><div>To<input id="ct" type="date"></div></div>
+    <button onclick="loadLines()">Show Report</button>
+    <div id="commOut" style="overflow-x:auto"></div>
+    <p style="font-size:12px;color:#777;margin-top:8px">Rates are set in the <b>Staff</b> tab of your Salon sheet (percent or fixed). Petty-cash advance deductions arrive in Phase 4.</p></div>
+  </section>
+
+  <section class="pg" id="p-mine"><h2>My Schedule &amp; Stats</h2><div class="card" id="mineOut"></div></section>
+
+  <section class="pg" id="p-soon"><h2 id="soonT"></h2><div class="card" id="soonP"></div></section>
  </div>
 </div>
 
 <script>
-const MASTER_URL = 'https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
-let salonUrl = '', token = '', user = null, cart = [];
+const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
+const CC='92';   // country code used to fix local numbers (92 = Pakistan)
+const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM',4],['clients','Clients','OM',3]]],
+ ['Finance',[['petty','Daily Petty Cash','OM',4],['exp','Expenses','OM',4],['rec','Recovery','O',4]]],
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM',4],['svc','Services Menu','OM',3],['wa','WhatsApp Report','OM',3],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
+let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const money=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+async function call(url,b){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});return r.json()}
+function lockout(){$('lock').style.display='block'}
+async function api(a,d){const r=await call(salonUrl,Object.assign({action:a,token},d||{}));if(r.locked){lockout();throw new Error('Account locked')}if(!r.ok)throw new Error(r.error);return r}
+function waLink(phone,text){let p=String(phone).replace(/\D/g,'');if(p.startsWith('0'))p=CC+p.slice(1);return 'https://wa.me/'+p+'?text='+encodeURIComponent(text)}
 
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function call(url, body) {
-  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) });
-  return r.json();
+async function signIn(){
+ const msg=$('msg');msg.textContent='Checking...';
+ try{
+  const m=await call(MASTER_URL,{action:'resolve',salonId:$('salonId').value});
+  if(m.status==='NotFound'){msg.textContent='Salon ID not found';return}
+  if(m.status!=='Active')return lockout();
+  salonUrl=m.salonUrl;
+  const r=await call(salonUrl,{action:'login',email:$('email').value,password:$('pass').value});
+  if(r.locked)return lockout();
+  if(!r.ok){msg.textContent=r.error;return}
+  token=r.token;user=r.user;
+  $('login').style.display='none';$('app').style.display='block';
+  $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
+  $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();
+  buildMenu();
+  if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists()}
+  go(user.role==='Staff'?'mine':'sale');
+ }catch(e){msg.textContent='Problem: '+e.message}
 }
-function lockout() { document.getElementById('lock').style.display = 'block'; }
-
-async function signIn() {
-  const msg = document.getElementById('msg'); msg.textContent = 'Checking...';
-  try {
-    const m = await call(MASTER_URL, { action: 'resolve', salonId: salonId.value });
-    if (m.status === 'NotFound') { msg.textContent = 'Salon ID not found'; return; }
-    if (m.status !== 'Active') return lockout();
-    salonUrl = m.salonUrl;
-    const r = await call(salonUrl, { action: 'login', email: email.value, password: pass.value });
-    if (r.locked) return lockout();
-    if (!r.ok) { msg.textContent = r.error; return; }
-    token = r.token; user = r.user;
-    document.getElementById('login').style.display = 'none';
-    document.getElementById('who').textContent = '(' + esc(user.name) + ' - ' + esc(user.role) + ')';
-    if (user.role === 'Staff') { document.body.insertAdjacentHTML('beforeend', '<p style="text-align:center">Your schedule and commission stats arrive in Phase 2.</p>'); return; }
-    document.getElementById('pos').style.display = 'block';
-    loadServices();
-  } catch (e) { msg.textContent = 'Connection problem: ' + e.message; }
+function buildMenu(){
+ const L=user.role[0];let h='';
+ MENU.forEach(g=>{const v=g[1].filter(i=>i[2].includes(L));if(v.length)h+='<div class="nl">'+g[0]+'</div>'+v.map(i=>`<div class="ni" id="n-${i[0]}" onclick="go('${i[0]}')">${i[1]}</div>`).join('')});
+ $('nav').innerHTML=h;
 }
-
-async function loadServices() {
-  const r = await call(salonUrl, { action: 'getServices', token });
-  if (r.locked) return lockout();
-  services.innerHTML = r.services.map((s, i) =>
-    `<div class="svc" onclick='add(${JSON.stringify({name:s.name,price:s.price})})'>${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
+function go(p){
+ document.querySelectorAll('.pg').forEach(x=>x.style.display='none');
+ document.querySelectorAll('.ni').forEach(x=>x.classList.remove('on'));
+ const sec=$('p-'+p);(sec||$('p-soon')).style.display='block';
+ if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
+ if($('n-'+p))$('n-'+p).classList.add('on');
+ $('sb').classList.remove('open');
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();
 }
-function add(item) { cart.push(item); draw(); }
-function remove(i) { cart.splice(i, 1); draw(); }
-function calc() {
-  const sub = cart.reduce((a, i) => a + Number(i.price), 0);
-  const d = sub * (Number(disc.value) || 0) / 100;
-  return (sub - d) * (1 + (Number(tax.value) || 0) / 100);
+function fillLists(){
+ $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
+ $('asv').innerHTML=services.map(s=>`<option>${esc(s.name)}</option>`).join('');
+ $('ast').innerHTML=staff.map(s=>`<option>${esc(s.name)}</option>`).join('');
 }
-function draw() {
-  document.getElementById('cart').innerHTML = cart.map((c, i) => `<div>${esc(c.name)} - ${esc(c.price)} <a href="#" onclick="remove(${i});return false">remove</a></div>`).join('');
-  total.textContent = 'Total: ' + calc().toFixed(2);
+function addS(i){cart.push({name:services[i].name,price:services[i].price,staff:''});draw()}
+function draw(){
+ $('cart').innerHTML=cart.map((c,i)=>`<div class="line"><b>${esc(c.name)}</b> - ${esc(c.price)} <a href="#" onclick="cart.splice(${i},1);draw();return false">remove</a>
+  <select onchange="cart[${i}].staff=this.value"><option value="">- Specialist -</option>${staff.map(s=>`<option ${s.name===c.staff?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`).join('');
+ const sub=cart.reduce((a,i)=>a+Number(i.price),0),d=sub*(Number($('disc').value)||0)/100;
+ $('total').textContent='Total: '+money((sub-d)*(1+(Number($('tax').value)||0)/100));
 }
-async function checkout() {
-  if (!cart.length) return alert('Cart is empty');
-  const r = await call(salonUrl, { action: 'saveSale', token, items: cart, discountPct: disc.value, taxPct: tax.value, method: method.value });
-  if (r.locked) return lockout();
-  if (!r.ok) return alert(r.error);
-  alert('Sale saved! Total: ' + Number(r.total).toFixed(2));
-  cart = []; draw();
+async function checkout(){
+ if(!cart.length)return alert('Cart is empty');
+ if(cart.some(c=>!c.staff)&&!confirm('Some items have no specialist (no commission will be recorded). Continue?'))return;
+ try{
+  const items=cart.slice(),r=await api('saveSale',{items,discountPct:$('disc').value,taxPct:$('tax').value,method:$('method').value});
+  let h='<p class="big">Sale saved! Total: '+money(r.total)+'</p>';
+  if($('cphone').value.trim()){
+   const t='Thank you for visiting us!\nReceipt '+r.saleId+'\n'+items.map(i=>'- '+i.name+': '+i.price).join('\n')+'\nTotal: '+money(r.total)+' ('+$('method').value+')\nPaperless receipt - Go Green';
+   h+='<a href="'+waLink($('cphone').value,t)+'" target="_blank" rel="noopener"><button type="button">Send receipt on WhatsApp</button></a>';
+  }
+  $('done').innerHTML=h;cart=[];draw();
+ }catch(e){alert(e.message)}
+}
+async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
+function showAppts(){
+ $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
+ <td><button class="sm" onclick="setS(${i},'Confirmed')">Confirm</button><button class="sm o" onclick="setS(${i},'Cancelled')">Cancel</button><br>
+ <a href="${waLink(a.phone,msgA(a,'c'))}" target="_blank" rel="noopener">WhatsApp confirm</a> | <a href="${waLink(a.phone,msgA(a,'r'))}" target="_blank" rel="noopener">Remind</a></td></tr>`).join('')+'</table>';
+}
+function msgA(a,k){return k==='c'?`Hi ${a.client}, your appointment for ${a.service} is confirmed on ${a.date} at ${a.time}. We look forward to seeing you!`:`Reminder: Hi ${a.client}, you have ${a.service} booked on ${a.date} at ${a.time}. Reply to reschedule.`}
+async function setS(i,s){try{await api('setAppt',{id:appts[i].id,status:s});loadAppts()}catch(e){alert(e.message)}}
+async function bookAppt(){
+ $('aerr').textContent='';
+ try{await api('saveAppt',{date:$('ad').value,time:$('at').value,min:$('am').value,client:$('ac').value,phone:$('ap').value,service:$('asv').value,staff:$('ast').value,status:$('as').value});
+  $('ac').value='';$('ap').value='';loadAppts();
+ }catch(e){$('aerr').textContent=e.message}
+}
+async function loadLines(){
+ const own=user.role==='Owner';
+ try{
+  const r=await api('lines',{from:own?$('cf').value:today().slice(0,8)+'01',to:own?$('ct').value:today()});
+  if(own){
+   const m={};r.lines.forEach(l=>{const k=l.staff||'(no specialist)';m[k]=m[k]||{n:0,net:0,c:0};m[k].n++;m[k].net+=l.net;m[k].c+=l.comm});
+   $('commOut').innerHTML='<table><tr><th>Specialist</th><th>Services</th><th>Gross sales</th><th>Commission</th></tr>'+Object.keys(m).map(k=>`<tr><td>${esc(k)}</td><td>${m[k].n}</td><td>${money(m[k].net)}</td><td>${money(m[k].c)}</td></tr>`).join('')+'</table>';
+  }else{
+   const n=r.lines.reduce((a,l)=>a+l.net,0),c=r.lines.reduce((a,l)=>a+l.comm,0);
+   $('mineOut').innerHTML=`<p class="big">This month: ${r.lines.length} services, sales ${money(n)}, commission ${money(c)}</p><h3>Upcoming appointments</h3>`+
+    (r.appts.map(a=>`<div class="line">${esc(a.date)} ${esc(a.time)} - ${esc(a.client)} (${esc(a.service)}) <span class="tag ${esc(a.status)}">${esc(a.status)}</span></div>`).join('')||'<p>None booked.</p>');
+  }
+ }catch(e){alert(e.message)}
 }
 </script></body></html>
