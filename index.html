@@ -44,6 +44,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
 .tag.Cancelled{background:#fca5a5}.tag.Confirmed{background:#86efac}
 .err{color:#b91c1c;margin:6px 0}
 .big{font-size:20px;font-weight:500;margin:8px 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.st{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 6px #0001}.st b{display:block;font-size:21px;color:var(--dk);margin-top:2px}.st small{color:#777}
 </style></head><body>
 
 <div id="lock"><b>Account Suspended</b><br>Contact Administrator</div>
@@ -61,7 +62,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
  <nav class="sb" id="sb">
   <div class="br">SALON POS<small id="who"></small></div>
   <div id="nav"></div>
-  <div class="ft"><span id="role"></span><br><button onclick="location.reload()">Sign out</button></div>
+  <div class="ft"><span id="role"></span><br><button onclick="signOut()">Sign out</button></div>
  </nav>
  <div class="main">
   <button class="burger" onclick="$('sb').classList.toggle('open')">&#9776; Menu</button>
@@ -121,6 +122,12 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card" id="wtpl"></div>
   </section>
 
+  <section class="pg" id="p-dash"><h2>Dashboard</h2>
+   <div class="stats" id="dstats"></div>
+   <div class="grid"><div class="card"><h3>Today's appointments</h3><div id="dappt"></div></div>
+   <div class="card"><h3>Needs attention</h3><div id="dalert"></div></div></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -152,7 +159,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
 <script>
 const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
-const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM',5],['clients','Clients','OM',3]]],
+const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O',5]]],
  ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','OM',5],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
@@ -177,14 +184,25 @@ async function signIn(){
   if(r.locked)return lockout();
   if(!r.ok){msg.textContent=r.error;return}
   token=r.token;user=r.user;
+  sessionStorage.setItem('spos',JSON.stringify({salonUrl,token,user}));
+  await start();
+ }catch(e){msg.textContent='Problem: '+e.message}
+}
+async function start(){
+ try{
   $('login').style.display='none';$('app').style.display='block';
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
   $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;
   buildMenu();
   if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);loadClients()}
-  go(user.role==='Staff'?'mine':'sale');
- }catch(e){msg.textContent='Problem: '+e.message}
+  const L=user.role[0],sp=sessionStorage.getItem('spage');
+  go(sp&&ITEMS[sp]&&ITEMS[sp][2].includes(L)?sp:(user.role==='Staff'?'mine':'dash'));
+ }catch(e){
+  if(/sign in again|Account locked/i.test(e.message)){if(/sign in/i.test(e.message))signOut();return}
+  $('login').style.display='flex';$('app').style.display='none';$('msg').textContent='Problem: '+e.message;
+ }
 }
+function signOut(){sessionStorage.removeItem('spos');sessionStorage.removeItem('spage');location.reload()}
 function buildMenu(){
  const L=user.role[0];let h='';
  MENU.forEach(g=>{const v=g[1].filter(i=>i[2].includes(L));if(v.length)h+='<div class="nl">'+g[0]+'</div>'+v.map(i=>`<div class="ni" id="n-${i[0]}" onclick="go('${i[0]}')">${i[1]}</div>`).join('')});
@@ -193,11 +211,12 @@ function buildMenu(){
 function go(p){
  document.querySelectorAll('.pg').forEach(x=>x.style.display='none');
  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('on'));
+ sessionStorage.setItem('spage',p);
  const sec=$('p-'+p);(sec||$('p-soon')).style.display='block';
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -311,6 +330,21 @@ function csv(k){
  const t=rows.map(r=>r.map(v=>{v=typeof v==='string'&&/^[=+\-@]/.test(v)?"'"+v:v;return '"'+String(v).replace(/"/g,'""')+'"'}).join(',')).join('\n');
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download=k+'-'+today()+'.csv';a.click();
 }
+async function loadDash(){
+ try{
+  const [r,v]=await Promise.all([api('dash'),api('invData')]);
+  const st=(a,b,c,go2)=>`<div class="st"${go2?` style="cursor:pointer" onclick="go('${go2}')"`:''}><small>${a}</small><b>${b}</b><small>${c||''}</small></div>`;
+  $('dstats').innerHTML=st("Today's sales",money(r.salesTotal),r.salesCount+' sales','sale')+st("Today's appointments",r.appts.length,'booked','appt')
+   +(r.month?st('This month revenue',money(r.month.revenue),'')+st('This month net profit',money(r.month.net),'after costs and commissions','rep')+st('Expenses to approve',r.pending,'waiting for you','exp'):'');
+  $('dappt').innerHTML=r.appts.map(a=>`<div class="line"><b>${esc(a.time)}</b> ${esc(a.client)} - ${esc(a.service)} with ${esc(a.staff)} ${tg(esc(a.status),a.status==='Confirmed'?'Confirmed':'')}</div>`).join('')||'<p>No appointments today.</p>';
+  const al=[];
+  v.products.forEach(p=>{if(p.stock<=p.low)al.push(tg('LOW','Cancelled')+' '+esc(p.name)+': '+p.stock+' '+esc(p.unit)+' left');
+   p.batches.forEach(b=>{if(b.exp&&b.exp<v.today)al.push(tg('EXPIRED','Cancelled')+' '+esc(p.name)+' batch '+esc(b.no)+' ('+b.qty+')');else if(b.exp&&b.exp<=v.soon)al.push(tg('expires soon')+' '+esc(p.name)+' batch '+esc(b.no)+' on '+esc(b.exp))})});
+  clients.filter(c=>c.bday&&daysTo(c.bday.slice(-5))<=7).forEach(c=>al.push('&#127874; '+esc(c.name)+(daysTo(c.bday.slice(-5))?' birthday in '+daysTo(c.bday.slice(-5))+' days':' birthday TODAY')));
+  if(user.role==='Owner'&&r.pending)al.push(tg('approve')+' '+r.pending+' expense(s) waiting');
+  $('dalert').innerHTML=al.map(x=>`<div class="line">${x}</div>`).join('')||'<p>All clear.</p>';
+ }catch(e){alert(e.message)}
+}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
@@ -340,4 +374,6 @@ async function loadLines(){
   }
  }catch(e){alert(e.message)}
 }
+// restore the login after a page refresh (runs last, once everything above is defined)
+(function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){salonUrl=sv.salonUrl;token=sv.token;user=sv.user;start()}}catch(e){}})();
 </script></body></html>
