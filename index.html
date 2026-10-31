@@ -154,6 +154,18 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card" style="overflow-x:auto"><div class="f2"><div>Payments are received by<select id="rmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div></div><div id="rlist"></div></div>
   </section>
 
+  <section class="pg" id="p-users"><h2>Users &amp; Passwords</h2>
+   <div class="card"><div class="f2"><div>Email (their login)<input id="ue" type="email"></div><div>Name<input id="un" placeholder="Staff logins must match a name in the Staff tab"></div>
+    <div>Role<select id="ur"><option>Manager</option><option>Staff</option><option>Owner</option></select></div><div>Password<input id="up" type="password" placeholder="At least 8 characters"></div></div>
+    <button onclick="saveU()">Save User</button> <button class="o" onclick="clrU()">Clear</button>
+    <p style="font-size:12px;color:#777;margin-top:6px">To change someone's password or role: click Edit, type a new password (leave it empty to keep the old one), and save. They are signed out and must sign in again.</p></div>
+   <div class="card" style="overflow-x:auto" id="ulist"></div>
+  </section>
+
+  <section class="pg" id="p-pw"><h2>My Password</h2>
+   <div class="card"><input id="pw0" type="password" placeholder="Current password"><input id="pw1" type="password" placeholder="New password (at least 8 characters)"><input id="pw2" type="password" placeholder="Type the new password again"><button onclick="changePw()">Change Password</button></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -187,7 +199,7 @@ const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mR
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O']]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['users','Users & Passwords','O'],['pw','My Password','OMS'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -242,7 +254,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -416,6 +428,16 @@ async function saveD(){try{await api('saveDue',{client:$('rcl').value,phone:$('r
 async function payR(i){const x=recs[i],a=prompt('Amount received from '+x.client+' (balance due '+money(x.balance)+'):');if(!a)return;
  try{const r=await api(x.kind==='bridal'?'bridalPay':'duePay',{id:x.id,amount:a,method:$('rmeth').value});alert('Saved. Balance now '+money(r.balance));loadRec()}catch(e){alert(e.message)}}
 async function woR(i){if(!confirm('Write off '+money(recs[i].balance)+' owed by '+recs[i].client+'? It will stop showing as owed.'))return;try{await api('dueWriteOff',{id:recs[i].id});loadRec()}catch(e){alert(e.message)}}
+let usersL=[];
+async function loadUsers(){try{usersL=(await api('listUsers')).users;$('ulist').innerHTML='<table><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>'+usersL.map((u,i)=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(u.role)}</td><td><button class="sm o" onclick="editU(${i})">Edit</button><button class="sm o" onclick="delU(${i})">Delete</button></td></tr>`).join('')+'</table>'}catch(e){alert(e.message)}}
+function editU(i){const u=usersL[i];$('ue').value=u.email;$('un').value=u.name;$('ur').value=u.role;$('up').value='';scrollTo(0,0)}
+function clrU(){['ue','un','up'].forEach(i=>$(i).value='')}
+async function saveU(){try{await api('saveUser',{email:$('ue').value,name:$('un').value,role:$('ur').value,password:$('up').value});clrU();loadUsers()}catch(e){alert(e.message)}}
+async function delU(i){if(!confirm('Delete the login for '+usersL[i].name+'?'))return;try{await api('deleteUser',{email:usersL[i].email});loadUsers()}catch(e){alert(e.message)}}
+async function changePw(){
+ if($('pw1').value!==$('pw2').value)return alert('The two new passwords are not the same');
+ try{await api('changePassword',{oldPassword:$('pw0').value,newPassword:$('pw1').value});alert('Password changed. Please sign in again with the new password.');signOut()}catch(e){alert(e.message)}
+}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
