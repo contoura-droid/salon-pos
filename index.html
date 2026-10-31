@@ -6,7 +6,7 @@
 :root{--dk:#2C1810;--gold:#C9A96E;--bg:#F4EFE8;--cream:#FBF8F3;--b:rgba(0,0,0,.13)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:#1a1a1a}
-input,select,button{font:inherit;padding:9px 11px;border:1.5px solid var(--b);border-radius:10px;background:var(--cream);width:100%;margin:4px 0}
+input,select,button,textarea{font:inherit;padding:9px 11px;border:1.5px solid var(--b);border-radius:10px;background:var(--cream);width:100%;margin:4px 0}
 button{background:var(--dk);color:var(--gold);border:0;cursor:pointer;width:auto;padding:9px 16px}
 button.sm{padding:5px 10px;font-size:12px;margin:2px}
 button.o{background:none;color:var(--dk);border:1.5px solid var(--b)}
@@ -72,8 +72,11 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
     <div class="card"><h3>Cart</h3><div id="cart"></div>
      <input id="disc" type="number" placeholder="Discount %" oninput="draw()">
      <input id="tax" type="number" placeholder="GST / Service charge %" oninput="draw()">
-     <select id="method"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select>
-     <input id="cphone" placeholder="Client WhatsApp number (for receipt, optional)">
+     <select id="csel" onchange="pickClient()"><option value="">Walk-in (no client)</option></select>
+     <div id="cinfo" style="font-size:12px;color:#777"></div>
+     <input id="cphone" placeholder="Client WhatsApp number (for receipt)">
+     <select id="method" onchange="$('cash').style.display=this.value==='Split'?'block':'none'"><option value="Cash">Cash</option><option value="Card">Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Split">Split (Cash + Card)</option><option value="Wallet">Client Wallet</option></select>
+     <input id="cash" type="number" placeholder="Cash amount (the rest goes on card)" style="display:none">
      <div class="big" id="total">Total: 0</div>
      <button onclick="checkout()">Complete Sale</button>
      <div id="done"></div>
@@ -100,6 +103,24 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
 
   <section class="pg" id="p-mine"><h2>My Schedule &amp; Stats</h2><div class="card" id="mineOut"></div></section>
 
+  <section class="pg" id="p-clients"><h2>Clients</h2>
+   <div class="card"><input type="hidden" id="cid"><div class="f2"><div>Name<input id="cn"></div><div>WhatsApp number<input id="cp" placeholder="03xx xxxxxxx"></div><div>Birthday<input id="cb" type="date"></div><div>Notes / preferences<input id="cno"></div></div>
+    <button onclick="saveC()">Save Client</button> <button class="o" onclick="clrC()">Clear</button></div>
+   <div class="card" style="overflow-x:auto"><input id="cq" placeholder="Search name or number" oninput="showClients()"><div id="clist"></div></div>
+  </section>
+
+  <section class="pg" id="p-mem"><h2>Memberships &amp; Wallets</h2>
+   <div class="card"><select id="msel" onchange="showMem()"></select><div id="minfo" class="big"></div>
+    <h3>Top up wallet</h3><div class="f2"><input id="wamt" type="number" placeholder="Amount"><select id="wmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div><button onclick="topUp()">Top Up</button>
+    <h3>Sell a multi-visit package</h3><div class="f2"><select id="psv"></select><input id="psn" type="number" placeholder="Sessions (e.g. 5)"><input id="ppr" type="number" placeholder="Package price"><select id="pmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div><button onclick="sellPkg()">Sell Package</button></div>
+  </section>
+
+  <section class="pg" id="p-wa"><h2>WhatsApp &amp; Birthdays</h2>
+   <div class="card"><h3>Birthdays in the next 7 days</h3><div id="wbd"></div></div>
+   <div class="card"><h3>We miss you (no visit for 60+ days)</h3><div id="wmiss"></div></div>
+   <div class="card" id="wtpl"></div>
+  </section>
+
   <section class="pg" id="p-soon"><h2 id="soonT"></h2><div class="card" id="soonP"></div></section>
  </div>
 </div>
@@ -109,7 +130,7 @@ const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mR
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM',4],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM',4],['exp','Expenses','OM',4],['rec','Recovery','O',4]]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM',4],['svc','Services Menu','OM',3],['wa','WhatsApp Report','OM',3],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM',4],['svc','Services Menu','OM',3],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -136,7 +157,7 @@ async function signIn(){
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
   $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();
   buildMenu();
-  if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists()}
+  if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);loadClients()}
   go(user.role==='Staff'?'mine':'sale');
  }catch(e){msg.textContent='Problem: '+e.message}
 }
@@ -152,40 +173,90 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
  $('asv').innerHTML=services.map(s=>`<option>${esc(s.name)}</option>`).join('');
  $('ast').innerHTML=staff.map(s=>`<option>${esc(s.name)}</option>`).join('');
+ $('psv').innerHTML=$('asv').innerHTML;
 }
-function addS(i){cart.push({name:services[i].name,price:services[i].price,staff:''});draw()}
+let clients=[],tpl={};
+const fill=(t,v)=>String(t||'').replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m);
+const curC=()=>clients.find(x=>x.id===$('csel').value);
+function addS(i){cart.push({name:services[i].name,price:services[i].price,staff:'',pkgId:''});draw()}
 function draw(){
- $('cart').innerHTML=cart.map((c,i)=>`<div class="line"><b>${esc(c.name)}</b> - ${esc(c.price)} <a href="#" onclick="cart.splice(${i},1);draw();return false">remove</a>
-  <select onchange="cart[${i}].staff=this.value"><option value="">- Specialist -</option>${staff.map(s=>`<option ${s.name===c.staff?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div>`).join('');
- const sub=cart.reduce((a,i)=>a+Number(i.price),0),d=sub*(Number($('disc').value)||0)/100;
+ const c0=curC();
+ $('cart').innerHTML=cart.map((c,i)=>{const pk=c0&&c0.pkgs.find(p=>p.service===c.name);return `<div class="line"><b>${esc(c.name)}</b> - ${c.pkgId?'package session':esc(c.price)} <a href="#" onclick="cart.splice(${i},1);draw();return false">remove</a>
+  <select onchange="cart[${i}].staff=this.value"><option value="">- Specialist -</option>${staff.map(s=>`<option ${s.name===c.staff?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+  ${pk?`<label><input type="checkbox" style="width:auto" ${c.pkgId?'checked':''} onchange="cart[${i}].pkgId=this.checked?'${esc(pk.id)}':'';draw()"> Use package (${pk.left} left)</label>`:''}</div>`}).join('');
+ const sub=cart.reduce((a,i)=>a+(i.pkgId?0:Number(i.price)),0),d=sub*(Number($('disc').value)||0)/100;
  $('total').textContent='Total: '+money((sub-d)*(1+(Number($('tax').value)||0)/100));
+}
+function pickClient(){
+ const c=curC();$('cphone').value=c?c.phone:'';cart.forEach(x=>x.pkgId='');
+ $('cinfo').textContent=c?'Wallet: '+money(c.wallet)+(c.pkgs.length?' | Packages: '+c.pkgs.map(p=>p.service+' ('+p.left+' left)').join(', '):''):'';
+ draw();
 }
 async function checkout(){
  if(!cart.length)return alert('Cart is empty');
  if(cart.some(c=>!c.staff)&&!confirm('Some items have no specialist (no commission will be recorded). Continue?'))return;
+ const m=$('method').value,cid=$('csel').value;
+ if((m==='Wallet'||cart.some(c=>c.pkgId))&&!cid)return alert('Choose a client first');
  try{
-  const items=cart.slice(),r=await api('saveSale',{items,discountPct:$('disc').value,taxPct:$('tax').value,method:$('method').value});
+  const items=cart.slice(),c=curC(),r=await api('saveSale',{items,clientId:cid,discountPct:$('disc').value,taxPct:$('tax').value,method:m,cashAmt:$('cash').value});
   let h='<p class="big">Sale saved! Total: '+money(r.total)+'</p>';
   if($('cphone').value.trim()){
-   const t='Thank you for visiting us!\nReceipt '+r.saleId+'\n'+items.map(i=>'- '+i.name+': '+i.price).join('\n')+'\nTotal: '+money(r.total)+' ('+$('method').value+')\nPaperless receipt - Go Green';
+   const t=fill(tpl.receipt||'Thank you {name}! Receipt {id}\n{items}\nTotal: {total} ({method})',{name:c?c.name:'valued guest',id:r.saleId,items:items.map(i=>'- '+i.name+(i.pkgId?' (package)':': '+i.price)).join('\n'),total:money(r.total),method:r.method});
    h+='<a href="'+waLink($('cphone').value,t)+'" target="_blank" rel="noopener"><button type="button">Send receipt on WhatsApp</button></a>';
   }
-  $('done').innerHTML=h;cart=[];draw();
+  $('done').innerHTML=h;cart=[];$('cphone').value='';$('cinfo').textContent='';draw();loadClients();
  }catch(e){alert(e.message)}
 }
+async function loadClients(){
+ try{
+  clients=(await api('getClients')).clients;
+  const o=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  $('csel').innerHTML='<option value="">Walk-in (no client)</option>'+o;
+  const ms=$('msel').value;$('msel').innerHTML='<option value="">Choose client</option>'+o;$('msel').value=ms;
+  showClients();showMem();showWa();
+ }catch(e){alert(e.message)}
+}
+function showClients(){
+ const q=$('cq').value.toLowerCase();
+ $('clist').innerHTML='<table><tr><th>Client</th><th>Spend / visits</th><th>Wallet</th><th></th></tr>'+clients.filter(c=>(c.name+c.phone).toLowerCase().includes(q)).map(c=>`<tr><td><b>${esc(c.name)}</b><br>${esc(c.phone)}<br><small>${esc(c.notes)}</small></td><td>${money(c.spend)}<br>${c.visits} visits<br><small>last: ${esc(c.last||'-')}</small></td><td>${money(c.wallet)}</td><td><button class="sm o" onclick="editC('${esc(c.id)}')">Edit</button></td></tr>`).join('')+'</table>';
+}
+function editC(id){const c=clients.find(x=>x.id===id);$('cid').value=c.id;$('cn').value=c.name;$('cp').value=c.phone;$('cb').value=c.bday;$('cno').value=c.notes;scrollTo(0,0)}
+function clrC(){['cid','cn','cp','cb','cno'].forEach(i=>$(i).value='')}
+async function saveC(){try{await api('saveClient',{id:$('cid').value,name:$('cn').value,phone:$('cp').value,bday:$('cb').value,notes:$('cno').value});clrC();loadClients()}catch(e){alert(e.message)}}
+function showMem(){
+ const c=clients.find(x=>x.id===$('msel').value);
+ $('minfo').innerHTML=c?'Wallet: '+money(c.wallet)+'<br><small>'+(c.pkgs.map(p=>esc(p.service)+': '+p.left+' sessions left').join(' | ')||'No active packages')+'</small>':'';
+}
+async function topUp(){
+ if(!$('msel').value)return alert('Choose a client');
+ try{const r=await api('walletTopup',{clientId:$('msel').value,amount:$('wamt').value,method:$('wmeth').value});$('wamt').value='';alert('Done. New wallet balance: '+money(r.balance));loadClients()}catch(e){alert(e.message)}
+}
+async function sellPkg(){
+ if(!$('msel').value)return alert('Choose a client');
+ try{await api('sellPackage',{clientId:$('msel').value,service:$('psv').value,sessions:$('psn').value,price:$('ppr').value,method:$('pmeth').value});$('psn').value='';$('ppr').value='';alert('Package sold');loadClients()}catch(e){alert(e.message)}
+}
+function daysTo(md){const t=new Date(today()+'T00:00:00'),y=t.getFullYear();let d=new Date(y+'-'+md+'T00:00:00');if(d<t)d=new Date((y+1)+'-'+md+'T00:00:00');return Math.round((d-t)/864e5)}
+function showWa(){
+ const bd=clients.filter(c=>c.bday).map(c=>({c,n:daysTo(c.bday.slice(-5))})).filter(x=>x.n<=7).sort((a,b)=>a.n-b.n);
+ $('wbd').innerHTML=bd.map(x=>`<div class="line">${esc(x.c.name)} - ${x.n?'in '+x.n+' days':'TODAY'} <a target="_blank" rel="noopener" href="${waLink(x.c.phone,fill(tpl.birthday,{name:x.c.name}))}">Send wishes</a></div>`).join('')||'<p>None.</p>';
+ const ms=clients.filter(c=>c.last&&(Date.now()-new Date(c.last))/864e5>60);
+ $('wmiss').innerHTML=ms.map(c=>`<div class="line">${esc(c.name)} - last visit ${esc(c.last)} <a target="_blank" rel="noopener" href="${waLink(c.phone,fill(tpl.miss,{name:c.name}))}">Send message</a></div>`).join('')||'<p>None.</p>';
+ $('wtpl').innerHTML=user&&user.role==='Owner'?'<h3>Message templates</h3><p style="font-size:12px;color:#777">You can use: {name} {service} {date} {time} {id} {items} {total} {method}</p>'+['confirm','remind','receipt','miss','birthday'].map(k=>`<b>${k}</b><textarea id="t_${k}" rows="3">${esc(tpl[k]||'')}</textarea><button class="sm" onclick="saveT('${k}')">Save</button><br>`).join(''):'';
+}
+async function saveT(k){try{await api('saveTemplate',{key:k,text:$('t_'+k).value});tpl[k]=$('t_'+k).value;alert('Saved')}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
  <td><button class="sm" onclick="setS(${i},'Confirmed')">Confirm</button><button class="sm o" onclick="setS(${i},'Cancelled')">Cancel</button><br>
  <a href="${waLink(a.phone,msgA(a,'c'))}" target="_blank" rel="noopener">WhatsApp confirm</a> | <a href="${waLink(a.phone,msgA(a,'r'))}" target="_blank" rel="noopener">Remind</a></td></tr>`).join('')+'</table>';
 }
-function msgA(a,k){return k==='c'?`Hi ${a.client}, your appointment for ${a.service} is confirmed on ${a.date} at ${a.time}. We look forward to seeing you!`:`Reminder: Hi ${a.client}, you have ${a.service} booked on ${a.date} at ${a.time}. Reply to reschedule.`}
+function msgA(a,k){return fill(k==='c'?(tpl.confirm||'Hi {name}, your {service} is confirmed on {date} at {time}.'):(tpl.remind||'Reminder: {name}, {service} on {date} at {time}.'),{name:a.client,service:a.service,date:a.date,time:a.time})}
 async function setS(i,s){try{await api('setAppt',{id:appts[i].id,status:s});loadAppts()}catch(e){alert(e.message)}}
 async function bookAppt(){
  $('aerr').textContent='';
