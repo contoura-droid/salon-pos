@@ -140,6 +140,12 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card"><div class="f2"><div>From<input id="af1" type="date"></div><div>To<input id="af2" type="date"></div></div><button onclick="loadAtt()">Show Summary</button><div id="asum" style="overflow-x:auto"></div></div>
   </section>
 
+  <section class="pg" id="p-bridal"><h2>Bridal Bookings</h2>
+   <div class="card"><input type="hidden" id="bid"><div class="f2"><div>Bride name<input id="bcl"></div><div>WhatsApp number<input id="bph" placeholder="03xx xxxxxxx"></div><div>Event date<input id="bdt" type="date"></div><div>Total price<input id="bto" type="number"></div></div>
+    <input id="bpk" placeholder="Package (e.g. Bridal makeup + hair + 2 trials)"><input id="bno" placeholder="Notes"><button onclick="saveB()">Save Booking</button> <button class="o" onclick="clrB()">Clear</button></div>
+   <div class="card" style="overflow-x:auto"><div class="f2"><div>Payments are received by<select id="bmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div></div><div id="blist"></div></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -173,7 +179,7 @@ const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mR
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O',5]]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -228,7 +234,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -379,6 +385,19 @@ async function loadAtt(){
  }catch(e){alert(e.message)}
 }
 async function clk(i,t){try{await api('clock',{staff:attS[i],type:t});loadAtt()}catch(e){alert(e.message)}}
+let bridals=[];
+async function loadBridal(){try{const o={Booked:0,Completed:1,Cancelled:2};bridals=(await api('bridalList')).items.sort((a,b)=>o[a.status]-o[b.status]||a.date.localeCompare(b.date));showBridal()}catch(e){alert(e.message)}}
+function showBridal(){
+ $('blist').innerHTML='<table><tr><th>Bride / event</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th></th></tr>'+bridals.map((b,i)=>`<tr><td><b>${esc(b.client)}</b><br>${esc(b.date)}<br><small>${esc(b.pkg)} ${esc(b.notes)}</small></td><td>${money(b.total)}</td><td>${money(b.paid)}</td><td><b>${money(b.balance)}</b></td><td>${tg(esc(b.status),b.status==='Booked'?'Confirmed':b.status==='Cancelled'?'Cancelled':'')}</td>
+ <td>${b.status!=='Cancelled'&&b.balance>0?`<button class="sm" onclick="payB(${i})">Receive payment</button>`:''}<button class="sm o" onclick="editB(${i})">Edit</button><br>
+ <a target="_blank" rel="noopener" href="${waLink(b.phone,fill('Hi {name}, a reminder that your bridal booking on {date} has a balance of {balance} due. Thank you!',{name:b.client,date:b.date,balance:money(b.balance)}))}">WhatsApp reminder</a><br>
+ ${b.status==='Booked'?`<button class="sm o" onclick="setB(${i},'Completed')">Complete</button><button class="sm o" onclick="setB(${i},'Cancelled')">Cancel</button>`:''}</td></tr>`).join('')+'</table>';
+}
+function editB(i){const b=bridals[i];$('bid').value=b.id;$('bcl').value=b.client;$('bph').value=b.phone;$('bdt').value=b.date;$('bto').value=b.total;$('bpk').value=b.pkg;$('bno').value=b.notes;scrollTo(0,0)}
+function clrB(){['bid','bcl','bph','bdt','bto','bpk','bno'].forEach(i=>$(i).value='')}
+async function saveB(){try{await api('saveBridal',{id:$('bid').value,client:$('bcl').value,phone:$('bph').value,date:$('bdt').value,total:$('bto').value,pkg:$('bpk').value,notes:$('bno').value});clrB();loadBridal()}catch(e){alert(e.message)}}
+async function payB(i){const b=bridals[i],a=prompt('Amount received from '+b.client+' (balance due '+money(b.balance)+'):');if(!a)return;try{const r=await api('bridalPay',{id:b.id,amount:a,method:$('bmeth').value});alert('Saved. Balance now '+money(r.balance));loadBridal()}catch(e){alert(e.message)}}
+async function setB(i,s){if(s==='Cancelled'&&!confirm('Cancel this booking? Payments already received stay recorded; refund them manually.'))return;try{await api('setBridal',{id:bridals[i].id,status:s});loadBridal()}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
