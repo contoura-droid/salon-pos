@@ -128,6 +128,13 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card"><h3>Needs attention</h3><div id="dalert"></div></div></div>
   </section>
 
+  <section class="pg" id="p-svc"><h2>Services Menu</h2>
+   <div class="card"><div class="f2"><input id="vcat" list="vcats" placeholder="Category (Beauty, Aesthetic...)"><input id="vname" placeholder="Service name"><input id="vprice" type="number" placeholder="Price"></div><datalist id="vcats"></datalist>
+    <button onclick="saveV()">Save Service</button> <button class="o" onclick="clrV()">Clear</button>
+    <p style="font-size:12px;color:#777;margin-top:6px">To change a price: click Edit, change it, Save. To rename a service: add it under the new name and delete the old one.</p></div>
+   <div class="card" style="overflow-x:auto" id="vlist"></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -161,7 +168,7 @@ const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mR
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O',5]]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','OM',5],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -194,7 +201,7 @@ async function start(){
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
   $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;
   buildMenu();
-  if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);loadClients()}
+  if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);await loadClients()}
   const L=user.role[0],sp=sessionStorage.getItem('spage');
   go(sp&&ITEMS[sp]&&ITEMS[sp][2].includes(L)?sp:(user.role==='Staff'?'mine':'dash'));
  }catch(e){
@@ -216,7 +223,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -345,6 +352,15 @@ async function loadDash(){
   $('dalert').innerHTML=al.map(x=>`<div class="line">${x}</div>`).join('')||'<p>All clear.</p>';
  }catch(e){alert(e.message)}
 }
+async function refreshData(){try{const d=await api('getData');services=d.services;staff=d.staff;fillLists();showSvc()}catch(e){alert(e.message)}}
+function showSvc(){
+ $('vcats').innerHTML=[...new Set(services.map(s=>s.category))].map(c=>`<option value="${esc(c)}">`).join('');
+ $('vlist').innerHTML='<table><tr><th>Category</th><th>Service</th><th>Price</th><th></th></tr>'+services.map((s,i)=>`<tr><td>${esc(s.category)}</td><td>${esc(s.name)}</td><td>${money(s.price)}</td><td><button class="sm o" onclick="editV(${i})">Edit</button><button class="sm o" onclick="delV(${i})">Delete</button></td></tr>`).join('')+'</table>';
+}
+function editV(i){$('vcat').value=services[i].category;$('vname').value=services[i].name;$('vprice').value=services[i].price;scrollTo(0,0)}
+function clrV(){['vcat','vname','vprice'].forEach(i=>$(i).value='')}
+async function saveV(){try{await api('saveService',{category:$('vcat').value,name:$('vname').value,price:$('vprice').value});clrV();refreshData()}catch(e){alert(e.message)}}
+async function delV(i){if(!confirm('Delete "'+services[i].name+'" from the menu? Past sales are not affected.'))return;try{await api('deleteService',{name:services[i].name});refreshData()}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
