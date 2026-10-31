@@ -98,7 +98,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card"><div class="f2"><div>From<input id="cf" type="date"></div><div>To<input id="ct" type="date"></div></div>
     <button onclick="loadLines()">Show Report</button>
     <div id="commOut" style="overflow-x:auto"></div>
-    <p style="font-size:12px;color:#777;margin-top:8px">Rates are set in the <b>Staff</b> tab of your Salon sheet (percent or fixed). Petty-cash advance deductions arrive in Phase 4.</p></div>
+    <p style="font-size:12px;color:#777;margin-top:8px">Rates are set in the <b>Staff</b> tab of your Salon sheet (percent or fixed). Advances are entered in Daily Petty Cash (type: Staff advance) and are deducted below.</p></div>
   </section>
 
   <section class="pg" id="p-mine"><h2>My Schedule &amp; Stats</h2><div class="card" id="mineOut"></div></section>
@@ -121,6 +121,30 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card" id="wtpl"></div>
   </section>
 
+  <section class="pg" id="p-inv"><h2>Inventory</h2>
+   <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
+   <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
+    <h3>New product</h3><div class="f2"><input id="np" placeholder="Name (e.g. Botox 100u)"><input id="nu" placeholder="Unit (ml, vial, pcs)"><input id="nl" type="number" placeholder="Low-stock alert at"></div><button onclick="addP()">Add Product</button>
+    <p style="font-size:12px;color:#777;margin-top:8px">How much product each service uses is set in the <b>Usage</b> tab of your Salon sheet (one row per product per service). Stock is taken automatically at checkout, oldest expiry first; expired batches are never used.</p></div>
+  </section>
+
+  <section class="pg" id="p-exp"><h2>Expenses</h2>
+   <div class="card"><div class="f2"><input id="ecat" placeholder="Category (rent, supplies...)"><input id="eamt" type="number" placeholder="Amount"></div><input id="enote" placeholder="Note"><button onclick="addE()">Add Expense</button>
+    <p style="font-size:12px;color:#777;margin-top:6px">Manager entries wait as Pending until the Owner approves them. This month:</p></div>
+   <div class="card" style="overflow-x:auto" id="elist"></div>
+  </section>
+
+  <section class="pg" id="p-petty"><h2>Daily Petty Cash</h2>
+   <div class="card"><div class="big" id="pbal"></div><div class="f2"><select id="pty"><option value="Out">Cash out (daily expense)</option><option value="In">Cash in (top-up)</option><option value="Advance">Staff advance</option></select><input id="pamt" type="number" placeholder="Amount"><select id="pst"></select><input id="pno" placeholder="Note"></div>
+    <p style="font-size:12px;color:#777">The staff box is only used for "Staff advance".</p><button onclick="addPc()">Save</button></div>
+   <div class="card" style="overflow-x:auto" id="plist"></div>
+  </section>
+
+  <section class="pg" id="p-rep"><h2>Reports &amp; Profit</h2>
+   <div class="card"><div class="f2"><div>From<input id="rf" type="date"></div><div>To<input id="rt" type="date"></div></div><button onclick="loadRep()">Show Report</button> <button class="o" onclick="csv('sales')">Sales CSV</button> <button class="o" onclick="csv('exp')">Expenses CSV</button></div>
+   <div class="card" id="repout" style="overflow-x:auto"></div>
+  </section>
+
   <section class="pg" id="p-soon"><h2 id="soonT"></h2><div class="card" id="soonP"></div></section>
  </div>
 </div>
@@ -128,9 +152,9 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
 <script>
 const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
-const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM',4],['clients','Clients','OM',3]]],
- ['Finance',[['petty','Daily Petty Cash','OM',4],['exp','Expenses','OM',4],['rec','Recovery','O',4]]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM',4],['svc','Services Menu','OM',3],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM',5],['clients','Clients','OM',3]]],
+ ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O',5]]],
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','OM',5],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -155,7 +179,7 @@ async function signIn(){
   token=r.token;user=r.user;
   $('login').style.display='none';$('app').style.display='block';
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
-  $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();
+  $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;
   buildMenu();
   if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);loadClients()}
   go(user.role==='Staff'?'mine':'sale');
@@ -173,13 +197,13 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
  $('asv').innerHTML=services.map(s=>`<option>${esc(s.name)}</option>`).join('');
  $('ast').innerHTML=staff.map(s=>`<option>${esc(s.name)}</option>`).join('');
- $('psv').innerHTML=$('asv').innerHTML;
+ $('psv').innerHTML=$('asv').innerHTML;$('pst').innerHTML=$('ast').innerHTML;
 }
 let clients=[],tpl={};
 const fill=(t,v)=>String(t||'').replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m);
@@ -250,6 +274,43 @@ function showWa(){
  $('wtpl').innerHTML=user&&user.role==='Owner'?'<h3>Message templates</h3><p style="font-size:12px;color:#777">You can use: {name} {service} {date} {time} {id} {items} {total} {method}</p>'+['confirm','remind','receipt','miss','birthday'].map(k=>`<b>${k}</b><textarea id="t_${k}" rows="3">${esc(tpl[k]||'')}</textarea><button class="sm" onclick="saveT('${k}')">Save</button><br>`).join(''):'';
 }
 async function saveT(k){try{await api('saveTemplate',{key:k,text:$('t_'+k).value});tpl[k]=$('t_'+k).value;alert('Saved')}catch(e){alert(e.message)}}
+let invT='',invSoon='',invL=[],repData=null;
+const monthStart=()=>today().slice(0,8)+'01';
+const tg=(t,c)=>`<span class="tag ${c||''}">${t}</span>`;
+async function loadInv(){
+ try{const r=await api('invData');invL=r.products;invT=r.today;invSoon=r.soon;
+  $('rp').innerHTML=invL.map(p=>`<option value="${esc(p.id)}">${esc(p.name)} (${esc(p.unit)})</option>`).join('');
+  $('invlist').innerHTML='<table><tr><th>Product</th><th>Usable stock</th><th>Batches (no. / expiry / qty)</th></tr>'+invL.map(p=>`<tr><td><b>${esc(p.name)}</b><br><small>${esc(p.unit)}</small></td><td>${p.stock}${p.stock<=p.low?' '+tg('LOW','Cancelled'):''}</td><td>${p.batches.map(b=>`${esc(b.no)} / ${esc(b.exp||'no expiry')} / ${b.qty}${b.exp&&b.exp<invT?' '+tg('EXPIRED','Cancelled'):b.exp&&b.exp<=invSoon?' '+tg('expires soon'):''}`).join('<br>')||'-'}</td></tr>`).join('')+'</table>';
+ }catch(e){alert(e.message)}
+}
+async function recv(){try{await api('receiveStock',{productId:$('rp').value,batchNo:$('rb').value,expiry:$('re').value,qty:$('rq').value});['rb','re','rq'].forEach(i=>$(i).value='');loadInv()}catch(e){alert(e.message)}}
+async function addP(){try{await api('addProduct',{name:$('np').value,unit:$('nu').value,lowAt:$('nl').value});['np','nu','nl'].forEach(i=>$(i).value='');loadInv()}catch(e){alert(e.message)}}
+async function loadExp(){
+ try{const r=await api('listExpenses',{from:monthStart(),to:today()});
+  $('elist').innerHTML='<table><tr><th>Date</th><th>Category</th><th>Amount</th><th>By</th><th>Status</th><th></th></tr>'+r.exps.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.cat)}<br><small>${esc(x.note)}</small></td><td>${money(x.amt)}</td><td>${esc(x.by)}</td><td>${tg(esc(x.status),x.status==='Approved'?'Confirmed':x.status==='Rejected'?'Cancelled':'')}</td><td>${user.role==='Owner'&&x.status==='Pending'?`<button class="sm" onclick="setE('${esc(x.id)}','Approved')">Approve</button><button class="sm o" onclick="setE('${esc(x.id)}','Rejected')">Reject</button>`:''}</td></tr>`).join('')+'</table>';
+ }catch(e){alert(e.message)}
+}
+async function addE(){try{await api('addExpense',{category:$('ecat').value,amount:$('eamt').value,note:$('enote').value});['ecat','eamt','enote'].forEach(i=>$(i).value='');loadExp()}catch(e){alert(e.message)}}
+async function setE(id,s){try{await api('setExpense',{id,status:s});loadExp()}catch(e){alert(e.message)}}
+async function loadPetty(){
+ try{const r=await api('listPetty',{from:monthStart(),to:today()});
+  $('pbal').textContent='Cash in petty box: '+money(r.balance);
+  $('plist').innerHTML='<table><tr><th>Date</th><th>Type</th><th>Amount</th><th>Details</th><th>By</th></tr>'+r.rows.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.type)}</td><td>${money(x.amt)}</td><td>${esc(x.staff)} ${esc(x.note)}</td><td>${esc(x.by)}</td></tr>`).join('')+'</table>';
+ }catch(e){alert(e.message)}
+}
+async function addPc(){try{await api('addPetty',{type:$('pty').value,amount:$('pamt').value,staff:$('pst').value,note:$('pno').value});$('pamt').value='';$('pno').value='';loadPetty()}catch(e){alert(e.message)}}
+async function loadRep(){
+ try{const r=await api('report',{from:$('rf').value,to:$('rt').value});repData=r;
+  const cost=r.expenses+r.petty+r.commission,net=r.revenue-cost,row=(a,b,x)=>`<tr><td>${a}</td><td style="text-align:right">${x?'<b>'+b+'</b>':b}</td></tr>`;
+  $('repout').innerHTML='<table>'+row('Revenue',money(r.revenue))+row('Approved expenses',money(r.expenses))+row('Petty cash outlays',money(r.petty))+row('Staff commissions',money(r.commission))+row('Net profit',money(net),1)+row('ROI (profit / costs)',cost>0?(net/cost*100).toFixed(1)+'%':'-')+'</table><h3>Top services</h3><table><tr><th>Service</th><th>Times sold</th><th>Sales</th></tr>'+Object.keys(r.top).sort((a,b)=>r.top[b].rev-r.top[a].rev).map(k=>`<tr><td>${esc(k)}</td><td>${r.top[k].n}</td><td>${money(r.top[k].rev)}</td></tr>`).join('')+'</table><p style="font-size:12px;color:#777;margin-top:8px">Profit = revenue minus approved expenses, petty cash outlays and commissions. Wallet top-ups count as revenue only when spent. Staff advances are not costs: they are deducted from payouts.</p>';
+ }catch(e){alert(e.message)}
+}
+function csv(k){
+ if(!repData)return alert('Click Show Report first');
+ const rows=k==='sales'?[['Date','SaleID','Total','Method','SoldBy']].concat(repData.sales.map(s=>[s.date,s.id,s.total,s.method,s.by])):[['Date','Category','Amount','Note','By','Status']].concat(repData.exps.map(x=>[x.date,x.cat,x.amt,x.note,x.by,x.status]));
+ const t=rows.map(r=>r.map(v=>{v=typeof v==='string'&&/^[=+\-@]/.test(v)?"'"+v:v;return '"'+String(v).replace(/"/g,'""')+'"'}).join(',')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download=k+'-'+today()+'.csv';a.click();
+}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
@@ -270,7 +331,8 @@ async function loadLines(){
   const r=await api('lines',{from:own?$('cf').value:today().slice(0,8)+'01',to:own?$('ct').value:today()});
   if(own){
    const m={};r.lines.forEach(l=>{const k=l.staff||'(no specialist)';m[k]=m[k]||{n:0,net:0,c:0};m[k].n++;m[k].net+=l.net;m[k].c+=l.comm});
-   $('commOut').innerHTML='<table><tr><th>Specialist</th><th>Services</th><th>Gross sales</th><th>Commission</th></tr>'+Object.keys(m).map(k=>`<tr><td>${esc(k)}</td><td>${m[k].n}</td><td>${money(m[k].net)}</td><td>${money(m[k].c)}</td></tr>`).join('')+'</table>';
+   Object.keys(r.adv).forEach(k=>{m[k]=m[k]||{n:0,net:0,c:0}});
+   $('commOut').innerHTML='<table><tr><th>Specialist</th><th>Services</th><th>Gross sales</th><th>Commission</th><th>Advances</th><th>Net payout</th></tr>'+Object.keys(m).map(k=>{const a=r.adv[k]||0;return `<tr><td>${esc(k)}</td><td>${m[k].n}</td><td>${money(m[k].net)}</td><td>${money(m[k].c)}</td><td>${money(a)}</td><td><b>${money(m[k].c-a)}</b></td></tr>`}).join('')+'</table>';
   }else{
    const n=r.lines.reduce((a,l)=>a+l.net,0),c=r.lines.reduce((a,l)=>a+l.comm,0);
    $('mineOut').innerHTML=`<p class="big">This month: ${r.lines.length} services, sales ${money(n)}, commission ${money(c)}</p><h3>Upcoming appointments</h3>`+
