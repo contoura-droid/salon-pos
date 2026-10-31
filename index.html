@@ -146,6 +146,14 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card" style="overflow-x:auto"><div class="f2"><div>Payments are received by<select id="bmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div></div><div id="blist"></div></div>
   </section>
 
+  <section class="pg" id="p-rec"><h2>Recovery</h2>
+   <div class="card"><div class="big" id="rtot"></div><h3>Add a due (money a customer owes you)</h3>
+    <div class="f2"><input id="rcl" placeholder="Client name"><input id="rph" placeholder="WhatsApp number"><input id="ram" type="number" placeholder="Amount owed"><input id="rno" placeholder="What for?"></div>
+    <button onclick="saveD()">Add Due</button>
+    <p style="font-size:12px;color:#777;margin-top:6px">Bridal balances appear here automatically. The money is counted as revenue when you receive it, so do not also ring the same service up in New Sale.</p></div>
+   <div class="card" style="overflow-x:auto"><div class="f2"><div>Payments are received by<select id="rmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div></div><div id="rlist"></div></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -178,7 +186,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
 const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
- ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O',5]]],
+ ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O']]],
  ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
@@ -234,7 +242,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -353,7 +361,7 @@ async function loadDash(){
   const [r,v]=await Promise.all([api('dash'),api('invData')]);
   const st=(a,b,c,go2)=>`<div class="st"${go2?` style="cursor:pointer" onclick="go('${go2}')"`:''}><small>${a}</small><b>${b}</b><small>${c||''}</small></div>`;
   $('dstats').innerHTML=st("Today's sales",money(r.salesTotal),r.salesCount+' sales','sale')+st("Today's appointments",r.appts.length,'booked','appt')
-   +(r.month?st('This month revenue',money(r.month.revenue),'')+st('This month net profit',money(r.month.net),'after costs and commissions','rep')+st('Expenses to approve',r.pending,'waiting for you','exp'):'');
+   +(r.month?st('This month revenue',money(r.month.revenue),'')+st('This month net profit',money(r.month.net),'after costs and commissions','rep')+st('Expenses to approve',r.pending,'waiting for you','exp')+st('Money owed to you',money(r.owed),'to collect','rec'):'');
   $('dappt').innerHTML=r.appts.map(a=>`<div class="line"><b>${esc(a.time)}</b> ${esc(a.client)} - ${esc(a.service)} with ${esc(a.staff)} ${tg(esc(a.status),a.status==='Confirmed'?'Confirmed':'')}</div>`).join('')||'<p>No appointments today.</p>';
   const al=[];
   v.products.forEach(p=>{if(p.stock<=p.low)al.push(tg('LOW','Cancelled')+' '+esc(p.name)+': '+p.stock+' '+esc(p.unit)+' left');
@@ -398,6 +406,16 @@ function clrB(){['bid','bcl','bph','bdt','bto','bpk','bno'].forEach(i=>$(i).valu
 async function saveB(){try{await api('saveBridal',{id:$('bid').value,client:$('bcl').value,phone:$('bph').value,date:$('bdt').value,total:$('bto').value,pkg:$('bpk').value,notes:$('bno').value});clrB();loadBridal()}catch(e){alert(e.message)}}
 async function payB(i){const b=bridals[i],a=prompt('Amount received from '+b.client+' (balance due '+money(b.balance)+'):');if(!a)return;try{const r=await api('bridalPay',{id:b.id,amount:a,method:$('bmeth').value});alert('Saved. Balance now '+money(r.balance));loadBridal()}catch(e){alert(e.message)}}
 async function setB(i,s){if(s==='Cancelled'&&!confirm('Cancel this booking? Payments already received stay recorded; refund them manually.'))return;try{await api('setBridal',{id:bridals[i].id,status:s});loadBridal()}catch(e){alert(e.message)}}
+let recs=[];
+async function loadRec(){try{const r=await api('recList');recs=r.items.sort((a,b)=>a.date.localeCompare(b.date));$('rtot').textContent='Total owed to you: '+money(r.total);showRec()}catch(e){alert(e.message)}}
+function showRec(){
+ $('rlist').innerHTML='<table><tr><th>Client</th><th>Type / date</th><th>Total</th><th>Paid</th><th>Balance</th><th></th></tr>'+recs.map((x,i)=>`<tr><td><b>${esc(x.client)}</b><br><small>${esc(x.note)}</small></td><td>${x.kind==='bridal'?'Bridal (event)':'Credit'}<br>${esc(x.date)}</td><td>${money(x.total)}</td><td>${money(x.paid)}</td><td><b>${money(x.balance)}</b></td>
+ <td><button class="sm" onclick="payR(${i})">Receive payment</button><br><a target="_blank" rel="noopener" href="${waLink(x.phone,fill('Hi {name}, a gentle reminder that {balance} is due at our salon. Thank you!',{name:x.client,balance:money(x.balance)}))}">WhatsApp reminder</a>${x.kind==='due'?`<br><button class="sm o" onclick="woR(${i})">Write off</button>`:''}</td></tr>`).join('')+'</table>';
+}
+async function saveD(){try{await api('saveDue',{client:$('rcl').value,phone:$('rph').value,amount:$('ram').value,note:$('rno').value});['rcl','rph','ram','rno'].forEach(i=>$(i).value='');loadRec()}catch(e){alert(e.message)}}
+async function payR(i){const x=recs[i],a=prompt('Amount received from '+x.client+' (balance due '+money(x.balance)+'):');if(!a)return;
+ try{const r=await api(x.kind==='bridal'?'bridalPay':'duePay',{id:x.id,amount:a,method:$('rmeth').value});alert('Saved. Balance now '+money(r.balance));loadRec()}catch(e){alert(e.message)}}
+async function woR(i){if(!confirm('Write off '+money(recs[i].balance)+' owed by '+recs[i].client+'? It will stop showing as owed.'))return;try{await api('dueWriteOff',{id:recs[i].id});loadRec()}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
