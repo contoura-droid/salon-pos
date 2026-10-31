@@ -135,6 +135,11 @@ table{width:100%;border-collapse:collapse}td,th{padding:7px 6px;border-bottom:1p
    <div class="card" style="overflow-x:auto" id="vlist"></div>
   </section>
 
+  <section class="pg" id="p-att"><h2>Attendance</h2>
+   <div class="card"><h3>Today</h3><div id="atoday" style="overflow-x:auto"></div></div>
+   <div class="card"><div class="f2"><div>From<input id="af1" type="date"></div><div>To<input id="af2" type="date"></div></div><button onclick="loadAtt()">Show Summary</button><div id="asum" style="overflow-x:auto"></div></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -168,7 +173,7 @@ const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mR
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O',5]]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM',5],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM',5],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]]];
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -199,7 +204,7 @@ async function start(){
  try{
   $('login').style.display='none';$('app').style.display='block';
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
-  $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;
+  $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;$('af1').value=$('cf').value;$('af2').value=$('ct').value;
   buildMenu();
   if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);await loadClients()}
   const L=user.role[0],sp=sessionStorage.getItem('spage');
@@ -223,7 +228,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  $('sb').classList.remove('open');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -361,6 +366,19 @@ function editV(i){$('vcat').value=services[i].category;$('vname').value=services
 function clrV(){['vcat','vname','vprice'].forEach(i=>$(i).value='')}
 async function saveV(){try{await api('saveService',{category:$('vcat').value,name:$('vname').value,price:$('vprice').value});clrV();refreshData()}catch(e){alert(e.message)}}
 async function delV(i){if(!confirm('Delete "'+services[i].name+'" from the menu? Past sales are not affected.'))return;try{await api('deleteService',{name:services[i].name});refreshData()}catch(e){alert(e.message)}}
+let attS=[],attR=[],attT=[];
+const toMin=t=>{const p=String(t).split(':');return (+p[0])*60+(+p[1])};
+const hm=m=>Math.floor(m/60)+'h '+('0'+m%60).slice(-2)+'m';
+async function loadAtt(){
+ try{const r=await api('attData',{from:$('af1').value,to:$('af2').value});attS=r.staff;attR=r.rows;attT=r.todayRows;
+  $('atoday').innerHTML='<table><tr><th>Staff</th><th>Status</th><th></th></tr>'+attS.map((n,i)=>{const rs=attT.filter(x=>x.staff===n),op=rs.find(x=>!x.out);
+   return `<tr><td>${esc(n)}</td><td>${op?tg('IN since '+esc(op.in),'Confirmed'):rs.length?'Done: '+rs.map(x=>esc(x.in)+' - '+esc(x.out)).join(', '):'Not in yet'}</td><td>${op?`<button class="sm o" onclick="clk(${i},'out')">Clock out</button>`:`<button class="sm" onclick="clk(${i},'in')">Clock in</button>`}</td></tr>`}).join('')+'</table>';
+  const m={};attR.forEach(x=>{const o=m[x.staff]=m[x.staff]||{days:new Set(),min:0,open:0};o.days.add(x.date);if(x.out)o.min+=Math.max(0,toMin(x.out)-toMin(x.in));else o.open++});
+  $('asum').innerHTML='<table><tr><th>Staff</th><th>Days present</th><th>Hours worked</th></tr>'+Object.keys(m).map(k=>`<tr><td>${esc(k)}</td><td>${m[k].days.size}</td><td>${hm(m[k].min)}${m[k].open?' '+tg(m[k].open+' not clocked out','Cancelled'):''}</td></tr>`).join('')+'</table>'
+   +'<h3>Log</h3><table><tr><th>Date</th><th>Staff</th><th>In</th><th>Out</th></tr>'+attR.slice().reverse().map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.staff)}</td><td>${esc(x.in)}</td><td>${esc(x.out||'-')}</td></tr>`).join('')+'</table>';
+ }catch(e){alert(e.message)}
+}
+async function clk(i,t){try{await api('clock',{staff:attS[i],type:t});loadAtt()}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
