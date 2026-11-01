@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2C1810"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Salon POS</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -59,28 +61,80 @@ tr:hover td{background:color-mix(in srgb,var(--gold) 7%,transparent)}
 .st:hover{transform:translateY(-3px)}
 .st b{display:block;font-family:var(--hf);font-size:29px;color:var(--dk);margin-top:2px}
 .st small{color:#777}
-@media(max-width:800px){.sb{transform:translateX(-100%)}.sb.open{transform:none}.main{margin-left:0;padding:14px}.burger{display:inline-block}.grid,.f2{grid-template-columns:1fr!important}}
+.pg>*{animation:rise .5s both}.pg>*:nth-child(2){animation-delay:.07s}.pg>*:nth-child(3){animation-delay:.14s}.pg>*:nth-child(4){animation-delay:.21s}
+.stats .st{animation:rise .5s both}.stats .st:nth-child(2){animation-delay:.06s}.stats .st:nth-child(3){animation-delay:.12s}.stats .st:nth-child(4){animation-delay:.18s}.stats .st:nth-child(5){animation-delay:.24s}.stats .st:nth-child(6){animation-delay:.3s}
+#ov{display:none;position:fixed;inset:0;background:#0008;z-index:90;backdrop-filter:blur(2px)}
+.mbar,.tabs{display:none}
+#offl{display:none;position:fixed;top:0;left:0;right:0;z-index:998;background:#92400e;color:#fff;text-align:center;padding:6px;font-size:12px}
+.ft .inst{display:none}
+/* ---- glass look ---- */
+body.glass{color:#fff;background:linear-gradient(135deg,color-mix(in srgb,var(--dk) 88%,#000),color-mix(in srgb,var(--dk) 60%,var(--gold)) 55%,color-mix(in srgb,var(--gold) 75%,var(--bg)));background-attachment:fixed}
+body.glass::before,body.glass::after{content:'';position:fixed;border-radius:50%;filter:blur(80px);opacity:.5;z-index:0;pointer-events:none;animation:float 20s ease-in-out infinite alternate}
+body.glass::before{width:50vw;height:50vw;left:-12vw;top:-12vw;background:var(--gold)}
+body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:color-mix(in srgb,var(--dk) 30%,#fff);animation-delay:-8s}
+@keyframes float{to{transform:translate(7vw,6vh) scale(1.18)}}
+.glass #app,.glass #login,.glass .main{position:relative;z-index:1}
+.glass #login{background:none}
+.glass .card,.glass .st,.glass #login .card{background:rgba(255,255,255,.13);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);border:1px solid rgba(255,255,255,.3);box-shadow:0 8px 32px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.35);color:#fff}
+.glass .st{border-top:3px solid var(--gold)}
+.glass .sb{background:rgba(255,255,255,.09);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);border-right:1px solid rgba(255,255,255,.22)}
+.glass h2,.glass h3,.glass .big,.glass .logo,.glass .st b{color:#fff}
+.glass .st small,.glass #ltag,.glass small,.glass [style*="color:#777"],.glass [style*="color:#555"]{color:rgba(255,255,255,.72)!important}
+.glass input,.glass select,.glass textarea{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.28);color-scheme:dark}
+.glass ::placeholder{color:rgba(255,255,255,.6)}
+.glass option{color:#222}
+.glass td,.glass th,.glass .line{border-color:rgba(255,255,255,.2)}
+.glass th{color:rgba(255,255,255,.75)}
+.glass tr:hover td{background:rgba(255,255,255,.07)}
+.glass .svc{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
+.glass a{color:color-mix(in srgb,var(--gold) 70%,#fff)}
+.glass button.o{color:#fff;border-color:rgba(255,255,255,.35)}
+.glass .tag{background:rgba(255,255,255,.22);color:#fff}
+.glass .tag.Cancelled{background:#fecaca;color:#7f1d1d}.glass .tag.Confirmed{background:#bbf7d0;color:#14532d}
+.glass .err{color:#fecaca}
+.glass .mbar,.glass .tabs{background:rgba(255,255,255,.14)}
+/* ---- phones and tablets ---- */
+@media(max-width:900px){
+ .sb{transform:translateX(-100%);width:268px;padding-top:env(safe-area-inset-top)}.sb.open{transform:none}
+ .main{margin-left:0;padding:0 12px calc(86px + env(safe-area-inset-bottom))}
+ .mbar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;margin:0 -12px 14px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:color-mix(in srgb,var(--dk) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--gold);font-family:var(--hf);font-size:21px;letter-spacing:1px}
+ .mbar button{padding:8px 14px;margin:0;background:#ffffff1c;color:var(--gold);box-shadow:none;font-size:18px}
+ .tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:80;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--dk) 95%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--soft)}
+ .tabs a{flex:1;text-align:center;color:#ffffffa8;font-size:10px;padding:5px 0;cursor:pointer;border-radius:12px;transition:all .15s}
+ .tabs a span{display:block;font-size:21px;line-height:1.1}
+ .tabs a.on{color:var(--gold);background:#ffffff14}
+ input,select,textarea{font-size:16px;min-height:46px}button{min-height:44px}button.sm{min-height:36px}
+ .card{overflow-x:auto;padding:14px}table{min-width:520px}
+ h2{font-size:27px}
+ .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){.grid,.f2{grid-template-columns:1fr!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style></head><body>
 
+<div id="offl">You are offline. Check your internet connection.</div>
 <div id="lock"><b>Account Suspended</b><br>Contact Administrator</div>
 
 <div id="login"><div class="card">
  <img id="llogo" alt="" style="display:none"><div class="logo" id="lname">SALON POS</div><p id="ltag">SIGN IN</p>
- <input id="salonId" placeholder="Salon ID (e.g. SALON001)">
+ <input id="salonId" placeholder="Salon name" autocapitalize="none" autocomplete="organization">
  <input id="email" placeholder="Email">
  <input id="pass" type="password" placeholder="Password">
  <button onclick="signIn()" style="width:100%">Sign In</button>
  <p id="msg" class="err"></p>
+ <button type="button" class="o inst" id="inst2" onclick="installApp()" style="margin-top:6px">Install this app</button><p id="ioshint" style="display:none;font-size:12px;color:#777;margin-top:8px">To install on iPhone or iPad: tap the Share button, then Add to Home Screen.</p>
 </div></div>
 
 <div id="app">
  <nav class="sb" id="sb">
   <div class="br"><img id="slogo" alt="" style="display:none"><span id="sname">SALON POS</span><small id="who"></small></div>
   <div id="nav"></div>
-  <div class="ft"><span id="role"></span><br><button onclick="signOut()">Sign out</button></div>
+  <div class="ft"><span id="role"></span><br><button class="inst" id="inst" onclick="installApp()">Install app</button> <button onclick="signOut()">Sign out</button></div>
  </nav>
+ <div id="ov" onclick="toggleNav(false)"></div>
+ <nav class="tabs" id="tabs"></nav>
  <div class="main">
-  <button class="burger" onclick="$('sb').classList.toggle('open')">&#9776; Menu</button>
+  <div class="mbar"><button type="button" onclick="toggleNav(true)">&#9776;</button><span id="mname">SALON POS</span></div>
 
   <section class="pg" id="p-sale"><h2>New Sale</h2>
    <div class="grid">
@@ -186,7 +240,7 @@ tr:hover td{background:color-mix(in srgb,var(--gold) 7%,transparent)}
     <h3>Ready-made themes (click one)</h3><div id="bpre" style="display:flex;flex-wrap:wrap;gap:8px"></div>
     <h3>Or choose your own colours</h3>
     <div class="f2"><div>Main colour (sidebar and buttons)<input id="bc1" type="color" oninput="liveBrand()"></div><div>Accent colour<input id="bc2" type="color" oninput="liveBrand()"></div>
-     <div>Page background<input id="bc3" type="color" oninput="liveBrand()"></div><div>Heading style<select id="bf" onchange="liveBrand()"><option value="elegant">Elegant</option><option value="classic">Classic serif</option><option value="modern">Modern</option></select></div></div>
+     <div>Page background<input id="bc3" type="color" oninput="liveBrand()"></div><div>Look<select id="bs" onchange="liveBrand()"><option value="solid">Solid</option><option value="glass">Glass (frosted, animated)</option></select></div><div>Heading style<select id="bf" onchange="liveBrand()"><option value="elegant">Elegant</option><option value="classic">Classic serif</option><option value="modern">Modern</option></select></div></div>
     <p style="font-size:12px;color:#777">Tip: choose a dark Main colour and a light Page background so everything stays easy to read. You can see the changes live as you pick.</p>
     <h3>Logo (JPEG, PNG or PDF)</h3><img id="lprev" alt="" style="display:none;max-height:90px;margin:6px 0"><input id="lfile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" onchange="pickLogo(this)"><p id="lstat" style="font-size:12px;color:#777"></p>
     <button class="o" type="button" onclick="removeLogo()">Remove logo</button> <button type="button" onclick="saveBrand()">Save Branding</button></div>
@@ -252,7 +306,7 @@ async function signIn(){
  const msg=$('msg');msg.textContent='Checking...';
  try{
   const m=await call(MASTER_URL,{action:'resolve',salonId:$('salonId').value});
-  if(m.status==='NotFound'){msg.textContent='Salon ID not found';return}
+  if(m.status==='NotFound'){msg.textContent='Salon not found. Check the salon name.';return}
   if(m.status!=='Active')return lockout();
   salonUrl=m.salonUrl;
   const r=await call(salonUrl,{action:'login',email:$('email').value,password:$('pass').value});
@@ -282,6 +336,9 @@ function buildMenu(){
  const L=user.role[0];let h='';
  MENU.forEach(g=>{const v=g[1].filter(i=>i[2].includes(L));if(v.length)h+='<div class="nl">'+g[0]+'</div>'+v.map(i=>`<div class="ni" id="n-${i[0]}" onclick="go('${i[0]}')">${ICON[i[0]]||''} ${i[1]}</div>`).join('')});
  $('nav').innerHTML=h;
+ const SH={dash:'Home',sale:'Sale',appt:'Bookings',clients:'Clients',mine:'My day',pw:'Password'};
+ const Q=['dash','sale','appt','clients','mine','pw'].filter(id=>ITEMS[id]&&ITEMS[id][2].includes(L)).slice(0,4);
+ $('tabs').innerHTML=Q.map(id=>`<a id="t-${id}" onclick="go('${id}')"><span>${ICON[id]}</span>${SH[id]}</a>`).join('')+'<a onclick="toggleNav(true)"><span>&#9776;</span>More</a>';
 }
 function go(p){
  document.querySelectorAll('.pg').forEach(x=>x.style.display='none');
@@ -290,7 +347,7 @@ function go(p){
  const sec=$('p-'+p);(sec||$('p-soon')).style.display='block';
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
- $('sb').classList.remove('open');
+ toggleNav(false);document.querySelectorAll('.tabs a').forEach(x=>x.classList.remove('on'));if($('t-'+p))$('t-'+p).classList.add('on');
  if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
 }
 function fillLists(){
@@ -411,6 +468,7 @@ async function loadDash(){
   const st=(a,b,c,go2)=>`<div class="st"${go2?` style="cursor:pointer" onclick="go('${go2}')"`:''}><small>${a}</small><b>${b}</b><small>${c||''}</small></div>`;
   $('dstats').innerHTML=st("Today's sales",money(r.salesTotal),r.salesCount+' sales','sale')+st("Today's appointments",r.appts.length,'booked','appt')
    +(r.month?st('This month revenue',money(r.month.revenue),'')+st('This month net profit',money(r.month.net),'after costs and commissions','rep')+st('Expenses to approve',r.pending,'waiting for you','exp')+st('Money owed to you',money(r.owed),'to collect','rec'):'');
+  countUp();
   $('dappt').innerHTML=r.appts.map(a=>`<div class="line"><b>${esc(a.time)}</b> ${esc(a.client)} - ${esc(a.service)} with ${esc(a.staff)} ${tg(esc(a.status),a.status==='Confirmed'?'Confirmed':'')}</div>`).join('')||'<p>No appointments today.</p>';
   const al=[];
   v.products.forEach(p=>{if(p.stock<=p.low)al.push(tg('LOW','Cancelled')+' '+esc(p.name)+': '+p.stock+' '+esc(p.unit)+' left');
@@ -476,17 +534,18 @@ async function changePw(){
  try{await api('changePassword',{oldPassword:$('pw0').value,newPassword:$('pw1').value});alert('Password changed. Please sign in again with the new password.');signOut()}catch(e){alert(e.message)}
 }
 const FONTS={elegant:"'Cormorant Garamond',serif",classic:"'Playfair Display',serif",modern:"'DM Sans',sans-serif"};
-let brand={name:'SALON POS',tagline:'',dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8',font:'elegant',logo:''};
-function applyBrand(b){
+let brand={name:'SALON POS',tagline:'',dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8',font:'elegant',logo:'',style:'solid'};
+function applyBrand(b,pwa){
  brand=Object.assign({},brand,b||{});
  if(brand.logo&&!/^data:image\/(png|jpeg|webp);base64,/.test(brand.logo))brand.logo='';
  const r=document.documentElement.style;r.setProperty('--dk',brand.dk);r.setProperty('--gold',brand.gold);r.setProperty('--bg',brand.bg);r.setProperty('--hf',FONTS[brand.font]||FONTS.elegant);
  $('sname').textContent=$('lname').textContent=brand.name||'SALON POS';$('ltag').textContent=brand.tagline||'SIGN IN';
  ['slogo','llogo'].forEach(id=>{const i=$(id);i.style.display=brand.logo?'block':'none';if(brand.logo)i.src=brand.logo});
- document.title=brand.name||'Salon POS';
+ document.title=brand.name||'Salon POS';$('mname').textContent=brand.name||'SALON POS';document.body.classList.toggle('glass',brand.style==='glass');
+ if(pwa)setupPwa();
 }
 function cacheBrand(b){try{const id=$('salonId').value.trim()||localStorage.getItem('lastSalon');if(id){localStorage.setItem('lastSalon',id);localStorage.setItem('brand_'+id,JSON.stringify(b))}}catch(e){}}
-function fetchBrand(){call(salonUrl,{action:'brand'}).then(b=>{if(b.ok){applyBrand(b.brand);cacheBrand(b.brand)}}).catch(()=>{})}
+function fetchBrand(){call(salonUrl,{action:'brand'}).then(b=>{if(b.ok){applyBrand(b.brand,true);cacheBrand(b.brand)}}).catch(()=>{})}
 async function loadBrandFor(id){
  id=id.trim();if(!id)return;
  try{const m=await call(MASTER_URL,{action:'resolve',salonId:id});if(m.status!=='Active'||!m.salonUrl)return;
@@ -495,12 +554,12 @@ async function loadBrandFor(id){
 const PRESETS={'Classic Gold':{dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8'},'Rose Blush':{dk:'#4A1D33',gold:'#E8A0B4',bg:'#FBF0F3'},'Emerald Spa':{dk:'#0F3D33',gold:'#D4B26A',bg:'#EEF5F1'},'Midnight Luxe':{dk:'#1B1B2F',gold:'#C8A2E8',bg:'#F1F0F7'},'Ocean Breeze':{dk:'#12324A',gold:'#7FC8D6',bg:'#EDF4F7'}};
 let bLogo;
 function initBrandForm(){
- $('bn').value=brand.name;$('btg').value=brand.tagline||'';$('bc1').value=brand.dk;$('bc2').value=brand.gold;$('bc3').value=brand.bg;$('bf').value=brand.font;bLogo=undefined;
+ $('bn').value=brand.name;$('btg').value=brand.tagline||'';$('bc1').value=brand.dk;$('bc2').value=brand.gold;$('bc3').value=brand.bg;$('bf').value=brand.font;$('bs').value=brand.style||'solid';bLogo=undefined;
  $('bpre').innerHTML=Object.keys(PRESETS).map(k=>`<button type="button" class="sw" style="background:linear-gradient(135deg,${PRESETS[k].dk} 55%,${PRESETS[k].gold})" onclick="preset('${k}')">${k}</button>`).join('');
  $('lprev').style.display=brand.logo?'block':'none';if(brand.logo)$('lprev').src=brand.logo;$('lstat').textContent='';
 }
 function preset(k){const p=PRESETS[k];$('bc1').value=p.dk;$('bc2').value=p.gold;$('bc3').value=p.bg;liveBrand()}
-function liveBrand(){applyBrand({name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value})}
+function liveBrand(){applyBrand({name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value,style:$('bs').value})}
 const LS={};
 function loadScript(src){return LS[src]||(LS[src]=new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>{delete LS[src];no(new Error('Could not load a helper file. Check your internet connection.'))};document.head.appendChild(s)}))}
 function trimCanvas(c){
@@ -535,7 +594,7 @@ async function pickLogo(inp){
 }
 function removeLogo(){bLogo='';applyBrand({logo:''});$('lprev').style.display='none';$('lfile').value='';$('lstat').textContent='Logo removed. Click Save Branding to keep this.'}
 async function saveBrand(){
- try{const o={name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value};if(bLogo!==undefined)o.logo=bLogo;
+ try{const o={name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value,style:$('bs').value};if(bLogo!==undefined)o.logo=bLogo;
   await api('saveBrand',o);bLogo=undefined;fetchBrand();alert('Branding saved');
  }catch(e){alert(e.message)}
 }
@@ -617,8 +676,29 @@ async function loadLines(){
   }
  }catch(e){alert(e.message)}
 }
-(function(){try{const id=localStorage.getItem('lastSalon');if(id){$('salonId').value=id;const b=JSON.parse(localStorage.getItem('brand_'+id)||'null');if(b)applyBrand(b)}}catch(e){}})();
+(function(){try{const id=localStorage.getItem('lastSalon');if(id){$('salonId').value=id;const b=JSON.parse(localStorage.getItem('brand_'+id)||'null');if(b)applyBrand(b,true)}}catch(e){}})();
 $('salonId').addEventListener('change',()=>loadBrandFor($('salonId').value));
+function toggleNav(o){$('sb').classList.toggle('open',o);$('ov').style.display=o?'block':'none'}
+function countUp(){document.querySelectorAll('#dstats .st b').forEach(b=>{const end=b.textContent,n=Number(end.replace(/,/g,''));if(!(n>0)||n>1e9)return;const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/700),e=1-Math.pow(1-k,3);b.textContent=k<1?money(Math.round(n*e)):end;if(k<1)requestAnimationFrame(f)})(t0)})}
+let dip=null,pwaT;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;['inst','inst2'].forEach(i=>$(i).style.display='inline-block')});
+addEventListener('appinstalled',()=>{['inst','inst2'].forEach(i=>$(i).style.display='none')});
+function installApp(){if(dip){dip.prompt();dip=null;['inst','inst2'].forEach(i=>$(i).style.display='none')}}
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)$('ioshint').style.display='block';
+addEventListener('online',()=>$('offl').style.display='none');addEventListener('offline',()=>$('offl').style.display='block');
+function setupPwa(){
+ clearTimeout(pwaT);pwaT=setTimeout(async()=>{try{
+  const mk=async size=>{const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,brand.dk);g.addColorStop(1,brand.gold);x.fillStyle=g;x.fillRect(0,0,size,size);
+   if(brand.logo){const i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=no;m.src=brand.logo});const k=size*.6/Math.max(i.width,i.height),w=i.width*k,hh=i.height*k,p=size*.05;x.fillStyle='rgba(255,255,255,.94)';x.fillRect((size-w)/2-p,(size-hh)/2-p,w+2*p,hh+2*p);x.drawImage(i,(size-w)/2,(size-hh)/2,w,hh)}
+   else{x.fillStyle='#fff';x.font='600 '+Math.round(size*.5)+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText((brand.name||'S').trim()[0].toUpperCase(),size/2,size/2+size*.03)}
+   return c.toDataURL('image/png')};
+  const base=location.origin+location.pathname.replace(/[^/]*$/,''),nm=(brand.name||'Salon POS').trim();
+  const man={name:nm,short_name:nm.slice(0,12),start_url:base,scope:base,display:'standalone',background_color:brand.bg,theme_color:brand.dk,icons:[{src:await mk(192),sizes:'192x192',type:'image/png',purpose:'any'},{src:await mk(512),sizes:'512x512',type:'image/png',purpose:'any'}]};
+  document.querySelector('link[rel=manifest]').href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'}));
+  document.querySelector('link[rel=apple-touch-icon]').href=await mk(180);document.querySelector('meta[name=theme-color]').content=brand.dk;
+ }catch(e){}},500);
+}
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 // restore the login after a page refresh (runs last, once everything above is defined)
 (function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){salonUrl=sv.salonUrl;token=sv.token;user=sv.user;start()}}catch(e){}})();
 </script></body></html>
