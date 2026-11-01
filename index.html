@@ -243,7 +243,9 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
      <div>Page background<input id="bc3" type="color" oninput="liveBrand()"></div><div>Look<select id="bs" onchange="liveBrand()"><option value="solid">Solid</option><option value="glass">Glass (frosted, animated)</option></select></div><div>Heading style<select id="bf" onchange="liveBrand()"><option value="elegant">Elegant</option><option value="classic">Classic serif</option><option value="modern">Modern</option></select></div></div>
     <p style="font-size:12px;color:#777">Tip: choose a dark Main colour and a light Page background so everything stays easy to read. You can see the changes live as you pick.</p>
     <h3>Logo (JPEG, PNG or PDF)</h3><img id="lprev" alt="" style="display:none;max-height:90px;margin:6px 0"><input id="lfile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" onchange="pickLogo(this)"><p id="lstat" style="font-size:12px;color:#777"></p>
-    <button class="o" type="button" onclick="removeLogo()">Remove logo</button> <button type="button" onclick="saveBrand()">Save Branding</button></div>
+    <button class="o" type="button" onclick="removeLogo()">Remove logo</button> <button type="button" onclick="saveBrand()">Save Branding</button>
+    <h3>Install as a phone app (once per salon)</h3><p style="font-size:12px;color:#777">After you have saved your name and logo, click this to get the files that make the installed app show your name and logo. Upload them to your website once.</p>
+    <button class="o" type="button" onclick="makeAppFiles()">Create app files</button><p id="astat" style="font-size:12px;color:#777"></p></div>
   </section>
 
   <section class="pg" id="p-imp"><h2>Import Data</h2>
@@ -676,7 +678,7 @@ async function loadLines(){
   }
  }catch(e){alert(e.message)}
 }
-(function(){try{const id=localStorage.getItem('lastSalon');if(id){$('salonId').value=id;const b=JSON.parse(localStorage.getItem('brand_'+id)||'null');if(b)applyBrand(b,true)}}catch(e){}})();
+(function(){try{const q=new URLSearchParams(location.search).get('salon'),id=q||localStorage.getItem('lastSalon');if(id){$('salonId').value=id;const b=JSON.parse(localStorage.getItem('brand_'+id)||'null');if(b)applyBrand(b,true);else if(q)loadBrandFor(q)}}catch(e){}})();
 $('salonId').addEventListener('change',()=>loadBrandFor($('salonId').value));
 function toggleNav(o){$('sb').classList.toggle('open',o);$('ov').style.display=o?'block':'none'}
 function countUp(){document.querySelectorAll('#dstats .st b').forEach(b=>{const end=b.textContent,n=Number(end.replace(/,/g,''));if(!(n>0)||n>1e9)return;const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/700),e=1-Math.pow(1-k,3);b.textContent=k<1?money(Math.round(n*e)):end;if(k<1)requestAnimationFrame(f)})(t0)})}
@@ -687,16 +689,32 @@ function installApp(){if(dip){dip.prompt();dip=null;['inst','inst2'].forEach(i=>
 if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone)$('ioshint').style.display='block';
 addEventListener('online',()=>$('offl').style.display='none');addEventListener('offline',()=>$('offl').style.display='block');
 function setupPwa(){
- clearTimeout(pwaT);pwaT=setTimeout(async()=>{try{
-  const mk=async size=>{const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,brand.dk);g.addColorStop(1,brand.gold);x.fillStyle=g;x.fillRect(0,0,size,size);
-   if(brand.logo){const i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=no;m.src=brand.logo});const k=size*.6/Math.max(i.width,i.height),w=i.width*k,hh=i.height*k,p=size*.05;x.fillStyle='rgba(255,255,255,.94)';x.fillRect((size-w)/2-p,(size-hh)/2-p,w+2*p,hh+2*p);x.drawImage(i,(size-w)/2,(size-hh)/2,w,hh)}
-   else{x.fillStyle='#fff';x.font='600 '+Math.round(size*.5)+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText((brand.name||'S').trim()[0].toUpperCase(),size/2,size/2+size*.03)}
-   return c.toDataURL('image/png')};
-  const base=location.origin+location.pathname.replace(/[^/]*$/,''),nm=(brand.name||'Salon POS').trim();
-  const man={name:nm,short_name:nm.slice(0,12),start_url:base,scope:base,display:'standalone',background_color:brand.bg,theme_color:brand.dk,icons:[{src:await mk(192),sizes:'192x192',type:'image/png',purpose:'any'},{src:await mk(512),sizes:'512x512',type:'image/png',purpose:'any'}]};
-  document.querySelector('link[rel=manifest]').href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'}));
-  document.querySelector('link[rel=apple-touch-icon]').href=await mk(180);document.querySelector('meta[name=theme-color]').content=brand.dk;
- }catch(e){}},500);
+ // Points the browser at this salon's real app files (made with "Create app files"). Without them the generic app files are used.
+ try{document.querySelector('meta[name=theme-color]').content=brand.dk}catch(e){}
+ const slug=($('salonId').value||localStorage.getItem('lastSalon')||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ if(!slug)return;const base='salons/'+slug+'/';
+ fetch(base+'manifest.webmanifest',{method:'HEAD',cache:'no-cache'}).then(r=>{if(!r.ok)return;
+  document.querySelector('link[rel=manifest]').href=base+'manifest.webmanifest';document.querySelector('link[rel=apple-touch-icon]').href=base+'apple-touch-icon.png'}).catch(()=>{});
+}
+async function iconCanvas(size,fit){
+ const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,brand.dk);g.addColorStop(1,brand.gold);x.fillStyle=g;x.fillRect(0,0,size,size);
+ if(brand.logo){const i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=no;m.src=brand.logo});const k=size*fit/Math.max(i.width,i.height),w=i.width*k,hh=i.height*k,p=size*.04;x.fillStyle='rgba(255,255,255,.95)';x.fillRect((size-w)/2-p,(size-hh)/2-p,w+2*p,hh+2*p);x.drawImage(i,(size-w)/2,(size-hh)/2,w,hh)}
+ else{x.fillStyle='#fff';x.font='600 '+Math.round(size*fit*.8)+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText((brand.name||'S').trim()[0].toUpperCase(),size/2,size/2+size*.03)}
+ return new Promise(r=>c.toBlob(r,'image/png'));
+}
+async function makeAppFiles(){
+ const name=($('salonId').value||localStorage.getItem('lastSalon')||'').trim(),slug=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+ if(!slug)return alert('Type your salon name in the sign-in box first (sign out, type it, sign in again), then try again.');
+ $('astat').textContent='Making files...';
+ try{
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+  const z=new JSZip(),d='salons/'+slug+'/',nm=(brand.name||'Salon POS').trim();
+  z.file(d+'icon-192.png',await iconCanvas(192,.62));z.file(d+'icon-512.png',await iconCanvas(512,.62));z.file(d+'icon-maskable-512.png',await iconCanvas(512,.5));z.file(d+'apple-touch-icon.png',await iconCanvas(180,.62));
+  z.file(d+'manifest.webmanifest',JSON.stringify({id:'../../?salon='+slug,name:nm,short_name:nm.slice(0,12),start_url:'../../?salon='+encodeURIComponent(name),scope:'../../',display:'standalone',background_color:brand.bg,theme_color:brand.dk,
+   icons:[{src:'icon-192.png',sizes:'192x192',type:'image/png',purpose:'any'},{src:'icon-512.png',sizes:'512x512',type:'image/png',purpose:'any'},{src:'icon-maskable-512.png',sizes:'512x512',type:'image/png',purpose:'maskable'}]},null,1));
+  const a=document.createElement('a');a.href=URL.createObjectURL(await z.generateAsync({type:'blob'}));a.download='app-files-'+slug+'.zip';a.click();
+  $('astat').textContent='Done. Unzip the downloaded file and upload the "salons" folder to GitHub (steps are in the guide).';
+ }catch(e){$('astat').textContent='';alert(e.message)}
 }
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 // restore the login after a page refresh (runs last, once everything above is defined)
