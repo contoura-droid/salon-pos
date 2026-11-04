@@ -65,6 +65,7 @@ tr:hover td{background:color-mix(in srgb,var(--gold) 7%,transparent)}
 .stats .st{animation:rise .5s both}.stats .st:nth-child(2){animation-delay:.06s}.stats .st:nth-child(3){animation-delay:.12s}.stats .st:nth-child(4){animation-delay:.18s}.stats .st:nth-child(5){animation-delay:.24s}.stats .st:nth-child(6){animation-delay:.3s}
 #ov{display:none;position:fixed;inset:0;background:#0008;z-index:90;backdrop-filter:blur(2px)}
 .mbar,.tabs{display:none}
+#bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:999;opacity:0;transition:opacity .2s;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:50% 100%;background-repeat:no-repeat;animation:slide 1s linear infinite}@keyframes slide{from{background-position:-50% 0}to{background-position:150% 0}}
 #offl{display:none;position:fixed;top:0;left:0;right:0;z-index:998;background:#92400e;color:#fff;text-align:center;padding:6px;font-size:12px}
 .ft .inst{display:none}
 /* ---- glass look ---- */
@@ -112,6 +113,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style></head><body>
 
+<div id="bar"></div>
 <div id="offl">You are offline. Check your internet connection.</div>
 <div id="lock"><b>Account Suspended</b><br>Contact Administrator</div>
 
@@ -257,6 +259,14 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
     <p style="font-size:12px;color:#777;margin-top:8px">Best order: Services, Staff, Products, Stock batches, Stock used per service, then Clients. Existing services, staff and usage rows with the same name are updated. Clients and products that already exist are skipped.</p></div>
   </section>
 
+  <section class="pg" id="p-docs"><h2>Documents</h2>
+   <div class="card"><div class="f2"><div>Type of document<select id="dcat" onchange="docCat()"></select></div><div>Belongs to<select id="dlt" onchange="docWho()"><option value="staff">Staff member</option><option value="client">Client</option><option value="">Nobody (general)</option></select></div>
+    <div id="dnmw">Person<select id="dnm"></select></div><div>Note (optional)<input id="dno" maxlength="200"></div></div>
+    <input id="dfile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,image/*"><button type="button" onclick="docUp()">Upload</button><p id="dstat" style="font-size:12px;color:#777"></p>
+    <p style="font-size:12px;color:#777">PDF, photos, Word and text files up to 8 MB. Large photos are shrunk automatically. Files are kept privately in your Google Drive and are opened only through this portal. Staff CVs and staff documents are for the Owner only; Managers see client documents and consent forms.</p></div>
+   <div class="card" style="overflow-x:auto"><div class="f2"><input id="dq" placeholder="Search name, person or type" oninput="showDocs()"><select id="dfc" onchange="showDocs()"></select></div><div id="dlist"></div></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -290,9 +300,9 @@ const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mR
 const CC='92';   // country code used to fix local numbers (92 = Pakistan)
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O']]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]],
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['docs','Documents','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]],
  ['Setup',[['brand','Brand & Theme','O'],['imp','Import Data','O'],['users','Users & Passwords','O'],['pw','My Password','OMS']]]];
-const ICON={sale:'🛍️',dash:'📊',clients:'👥',petty:'💵',exp:'🧾',rep:'📈',rec:'💳',appt:'📅',bridal:'👰',mem:'🎁',inv:'🧴',svc:'💇',wa:'💬',att:'🕒',comm:'💰',mine:'🗓️',brand:'🎨',imp:'📥',users:'🔐',pw:'🔑'};
+const ICON={sale:'🛍️',dash:'📊',clients:'👥',petty:'💵',exp:'🧾',rep:'📈',rec:'💳',appt:'📅',bridal:'👰',mem:'🎁',inv:'🧴',svc:'💇',wa:'💬',att:'🕒',docs:'📁',comm:'💰',mine:'🗓️',brand:'🎨',imp:'📥',users:'🔐',pw:'🔑'};
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
@@ -301,7 +311,8 @@ const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOStr
 const money=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 async function call(url,b){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});return r.json()}
 function lockout(){$('lock').style.display='block'}
-async function api(a,d){const r=await call(salonUrl,Object.assign({action:a,token},d||{}));if(r.locked){lockout();throw new Error('Account locked')}if(!r.ok)throw new Error(r.error);return r}
+let busy=0;const bar=n=>{busy+=n;$('bar').style.opacity=busy>0?1:0};
+async function api(a,d){bar(1);try{const r=await call(salonUrl,Object.assign({action:a,token},d||{}));if(r.locked){lockout();throw new Error('Account locked')}if(!r.ok)throw new Error(r.error);return r}finally{bar(-1)}}
 function waLink(phone,text){let p=String(phone).replace(/\D/g,'');if(p.startsWith('0'))p=CC+p.slice(1);else if(p.length<=10)p=CC+p;return 'https://wa.me/'+p+'?text='+encodeURIComponent(text)}
 
 async function signIn(){
@@ -325,7 +336,7 @@ async function start(){
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
   $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;$('af1').value=$('cf').value;$('af2').value=$('ct').value;
   buildMenu();fetchBrand();
-  if(user.role!=='Staff'){const d=await api('getData');services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text);await loadClients()}
+  if(user.role!=='Staff'){const [d]=await Promise.all([api('getData'),loadClients()]);services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text)}
   const L=user.role[0],sp=sessionStorage.getItem('spage');
   go(sp&&ITEMS[sp]&&ITEMS[sp][2].includes(L)?sp:(user.role==='Staff'?'mine':'dash'));
  }catch(e){
@@ -350,7 +361,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  toggleNav(false);document.querySelectorAll('.tabs a').forEach(x=>x.classList.remove('on'));if($('t-'+p))$('t-'+p).classList.add('on');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa')loadClients();if(p==='dash')loadDash();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa'){showClients();showMem();showWa();loadClients()}if(p==='docs')initDocs();if(p==='dash')loadDash();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
 }
 function fillLists(){
  $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
@@ -649,6 +660,43 @@ async function doImport(){
  impRows=[];$('ifile').value='';$('iprev').innerHTML='';
  try{const d=await api('getData');services=d.services;staff=d.staff;fillLists();await loadClients()}catch(e){}
 }
+let docsL=[];
+const DCATS={'Staff CV':'O','Staff document':'O','Consent form':'OM','Client document':'OM','Other':'O'};
+function initDocs(){
+ const c=Object.keys(DCATS).filter(k=>DCATS[k].includes(user.role[0]));
+ $('dcat').innerHTML=c.map(x=>`<option>${x}</option>`).join('');$('dfc').innerHTML='<option value="">All types</option>'+c.map(x=>`<option>${x}</option>`).join('');
+ docCat();loadDocs();
+}
+function docCat(){const c=$('dcat').value;$('dlt').value=/^Staff/.test(c)?'staff':/^(Consent|Client)/.test(c)?'client':'';docWho()}
+function docWho(){const t=$('dlt').value;$('dnmw').style.display=t?'block':'none';$('dnm').innerHTML=(t==='staff'?staff.map(s=>s.name):t==='client'?clients.map(c=>c.name):[]).map(n=>`<option>${esc(n)}</option>`).join('')}
+async function loadDocs(){try{docsL=(await api('docList')).docs;showDocs()}catch(e){$('dlist').textContent=e.message}}
+const fsz=n=>n>1e6?(n/1e6).toFixed(1)+' MB':Math.max(1,Math.round(n/1e3))+' KB';
+function showDocs(){
+ const q=$('dq').value.toLowerCase(),c=$('dfc').value,l=docsL.filter(d=>(!c||d.cat===c)&&(d.name+d.linkName+d.cat+d.note).toLowerCase().includes(q));
+ $('dlist').innerHTML=l.length?'<table><tr><th>Date</th><th>Document</th><th>Type / belongs to</th><th>By</th><th></th></tr>'+l.map(d=>`<tr><td>${esc(d.date)}</td><td><b>${esc(d.name)}</b><br><small>${fsz(d.size)} ${esc(d.note)}</small></td><td>${esc(d.cat)}<br><small>${esc(d.linkName)}</small></td><td>${esc(d.by)}</td>
+ <td><button class="sm" onclick="openDoc('${esc(d.id)}',0)">View</button><button class="sm o" onclick="openDoc('${esc(d.id)}',1)">Download</button>${user.role==='Owner'?`<button class="sm o" onclick="delDoc('${esc(d.id)}')">Delete</button>`:''}</td></tr>`).join('')+'</table>':'<p>No documents yet.</p>';
+}
+function shrinkImg(f){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,1800/Math.max(i.naturalWidth,i.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(i,0,0,c.width,c.height);c.toBlob(b=>b?ok(b):no(new Error('Could not shrink that photo')),'image/jpeg',.85)};i.onerror=()=>no(new Error('Could not read that photo. Try a JPG or PNG.'));i.src=URL.createObjectURL(f)})}
+async function docUp(){
+ const f=$('dfile').files[0];if(!f)return alert('Choose a file first');
+ const lt=$('dlt').value,nm=$('dnm').value;if(lt&&!nm)return alert('Choose who this document belongs to. Add them under Clients or Staff first if they are missing.');
+ try{
+  $('dstat').textContent='Preparing...';let blob=f,name=f.name;
+  if(/^image\//.test(f.type)&&f.size>1.2e6){blob=await shrinkImg(f);name=name.replace(/\.\w+$/,'')+'.jpg'}
+  if(blob.size>8*1024*1024)throw new Error('That file is over 8 MB. Please use a smaller file.');
+  const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=()=>no(new Error('Could not read the file'));r.readAsDataURL(blob)});
+  $('dstat').textContent='Uploading... please wait';
+  await api('docUpload',{category:$('dcat').value,linkType:lt,linkName:lt?nm:'',note:$('dno').value,fileName:name,data});
+  $('dfile').value='';$('dno').value='';$('dstat').textContent='Uploaded.';loadDocs();
+ }catch(e){$('dstat').textContent='';alert(e.message)}
+}
+async function openDoc(id,dl){
+ const w=dl?null:window.open('','_blank');
+ try{const r=await api('docGet',{id}),url=URL.createObjectURL(new Blob([Uint8Array.from(atob(r.data),c=>c.charCodeAt(0))],{type:r.mime}));
+  if(dl){const a=document.createElement('a');a.href=url;a.download=r.name;a.click()}else if(w)w.location=url;else location.href=url;
+ }catch(e){if(w)w.close();alert(e.message)}
+}
+async function delDoc(id){if(!confirm('Delete this document? It is moved to the Drive bin.'))return;try{await api('docDelete',{id});loadDocs()}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
