@@ -3,30 +3,31 @@
 <meta name="theme-color" content="#2C1810"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Salon POS</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Playfair+Display:wght@500;600&family=DM+Sans:wght@400;500&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--dk:#2C1810;--gold:#C9A96E;--bg:#F4EFE8;--hf:'Cormorant Garamond',serif;--cream:color-mix(in srgb,var(--bg) 35%,#fff);--b:color-mix(in srgb,var(--dk) 14%,transparent);--soft:color-mix(in srgb,var(--gold) 24%,transparent)}
+:root{--tx:#1a1a1a;--tx2:#777;--card:#fff;--hd:var(--dk);--lk:color-mix(in srgb,var(--dk) 55%,var(--gold));--dk:#2C1810;--gold:#C9A96E;--bg:#F4EFE8;--hf:'Cormorant Garamond',serif;--cream:color-mix(in srgb,var(--bg) 35%,#fff);--b:color-mix(in srgb,var(--dk) 14%,transparent);--soft:color-mix(in srgb,var(--gold) 24%,transparent)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1a1a;background:radial-gradient(900px 500px at 100% -5%,color-mix(in srgb,var(--gold) 22%,transparent),transparent),radial-gradient(700px 500px at -10% 110%,color-mix(in srgb,var(--dk) 10%,transparent),transparent),var(--bg);background-attachment:fixed}
-input,select,button,textarea{font:inherit;padding:10px 12px;border:1.5px solid var(--b);border-radius:12px;background:var(--cream);width:100%;margin:4px 0;transition:border-color .2s,box-shadow .2s}
+body{font-family:'DM Sans','Noto Naskh Arabic',sans-serif;font-size:14px;color:var(--tx);background:radial-gradient(900px 500px at 100% -5%,color-mix(in srgb,var(--gold) 22%,transparent),transparent),radial-gradient(700px 500px at -10% 110%,color-mix(in srgb,var(--dk) 10%,transparent),transparent),var(--bg);background-attachment:fixed}
+input,select,button,textarea{color:var(--tx);unicode-bidi:plaintext;font:inherit;padding:10px 12px;border:1.5px solid var(--b);border-radius:12px;background:var(--cream);width:100%;margin:4px 0;transition:border-color .2s,box-shadow .2s}
 input:focus,select:focus,textarea:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px var(--soft)}
 input[type=color]{height:44px;padding:4px;cursor:pointer}
 button{background:linear-gradient(135deg,var(--dk),color-mix(in srgb,var(--dk) 72%,var(--gold)));color:var(--gold);border:0;cursor:pointer;width:auto;padding:10px 18px;font-weight:500;letter-spacing:.2px;box-shadow:0 2px 8px color-mix(in srgb,var(--dk) 28%,transparent);transition:transform .15s,box-shadow .15s}
 button:hover{transform:translateY(-1px);box-shadow:0 6px 16px color-mix(in srgb,var(--dk) 32%,transparent)}
 button.sm{padding:5px 11px;font-size:12px;margin:2px;border-radius:9px;box-shadow:none}
-button.o{background:transparent;color:var(--dk);border:1.5px solid var(--b);box-shadow:none}
+button.o{background:transparent;color:var(--hd);border:1.5px solid var(--b);box-shadow:none}
 button.o:hover{border-color:var(--gold);background:var(--soft)}
 button.sw{color:#fff;border:2px solid #fff;box-shadow:0 2px 8px #0003;padding:9px 14px;font-size:12px}
-a{color:color-mix(in srgb,var(--dk) 55%,var(--gold))}
-h2{font-family:var(--hf);font-size:31px;font-weight:600;color:var(--dk);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+a{color:var(--lk)}
+option{color:var(--tx);background:var(--card)}
+h2{font-family:var(--hf);font-size:31px;font-weight:600;color:var(--hd);margin-bottom:14px;display:flex;align-items:center;gap:12px}
 h2:after{content:'';flex:1;height:2px;max-width:90px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px}
-h3{margin:12px 0 6px;font-size:14px;color:var(--dk)}
+h3{margin:12px 0 6px;font-size:14px;color:var(--hd)}
 #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(600px 400px at 15% 10%,color-mix(in srgb,var(--gold) 32%,transparent),transparent),radial-gradient(700px 500px at 90% 95%,color-mix(in srgb,var(--gold) 20%,transparent),transparent),linear-gradient(160deg,var(--dk),color-mix(in srgb,var(--dk) 55%,#000))}
-.card{background:#fff;border-radius:18px;padding:18px;border:1px solid var(--soft);box-shadow:0 4px 20px color-mix(in srgb,var(--dk) 8%,transparent);margin-bottom:14px}
+.card{background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--soft);box-shadow:0 4px 20px color-mix(in srgb,var(--dk) 8%,transparent);margin-bottom:14px}
 #login .card{max-width:400px;width:100%;padding:32px 28px;text-align:center;box-shadow:0 24px 70px #0007;animation:rise .5s ease}
-.logo{font-family:var(--hf);font-size:32px;letter-spacing:3px;color:var(--dk)}
+.logo{font-family:var(--hf);font-size:32px;letter-spacing:3px;color:var(--hd)}
 #llogo{max-width:140px;max-height:96px;margin:0 auto 10px}
-#ltag{font-size:11px;color:#999;letter-spacing:2.5px;margin:2px 0 18px;text-transform:uppercase}
+#ltag{font-size:11px;color:var(--tx2);letter-spacing:2.5px;margin:2px 0 18px;text-transform:uppercase}
 #lock{display:none;position:fixed;inset:0;z-index:999;background:#7a1c2e;color:#fff;text-align:center;padding-top:25vh;font-size:26px}
 #app{display:none}
 .sb{position:fixed;inset:0 auto 0 0;width:224px;background:linear-gradient(185deg,var(--dk),color-mix(in srgb,var(--dk) 70%,#000));display:flex;flex-direction:column;z-index:100;transition:transform .25s;box-shadow:4px 0 26px #0003}
@@ -50,17 +51,17 @@ h3{margin:12px 0 6px;font-size:14px;color:var(--dk)}
 .svc:hover{border-color:var(--gold);transform:translateX(3px);box-shadow:0 3px 10px var(--soft)}
 .line{border-bottom:1px solid var(--b);padding:7px 0}
 table{width:100%;border-collapse:collapse}td,th{padding:9px 7px;border-bottom:1px solid var(--b);text-align:left;font-size:13px}
-th{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:color-mix(in srgb,var(--dk) 65%,#888)}
+th{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--tx2)}
 tr:hover td{background:color-mix(in srgb,var(--gold) 7%,transparent)}
-.tag{font-size:11px;padding:2px 9px;border-radius:20px;background:var(--soft);color:var(--dk)}
+.tag{font-size:11px;padding:2px 9px;border-radius:20px;background:var(--soft);color:var(--hd)}
 .tag.Cancelled{background:#fecaca;color:#7f1d1d}.tag.Confirmed{background:#bbf7d0;color:#14532d}
 .err{color:#b91c1c;margin:6px 0}
-.big{font-size:20px;font-weight:500;margin:8px 0;color:var(--dk)}
+.big{font-size:20px;font-weight:500;margin:8px 0;color:var(--hd)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px}
-.st{background:#fff;border-radius:16px;padding:14px 16px;border:1px solid var(--soft);border-top:3px solid var(--gold);box-shadow:0 4px 16px color-mix(in srgb,var(--dk) 7%,transparent);transition:transform .15s}
+.st{background:var(--card);border-radius:16px;padding:14px 16px;border:1px solid var(--soft);border-top:3px solid var(--gold);box-shadow:0 4px 16px color-mix(in srgb,var(--dk) 7%,transparent);transition:transform .15s}
 .st:hover{transform:translateY(-3px)}
-.st b{display:block;font-family:var(--hf);font-size:29px;color:var(--dk);margin-top:2px}
-.st small{color:#777}
+.st b{display:block;font-family:var(--hf);font-size:29px;color:var(--hd);margin-top:2px}
+.st small{color:var(--tx2)}
 .pg>*{animation:rise .5s both}.pg>*:nth-child(2){animation-delay:.07s}.pg>*:nth-child(3){animation-delay:.14s}.pg>*:nth-child(4){animation-delay:.21s}
 .stats .st{animation:rise .5s both}.stats .st:nth-child(2){animation-delay:.06s}.stats .st:nth-child(3){animation-delay:.12s}.stats .st:nth-child(4){animation-delay:.18s}.stats .st:nth-child(5){animation-delay:.24s}.stats .st:nth-child(6){animation-delay:.3s}
 #ov{display:none;position:fixed;inset:0;background:#0008;z-index:90;backdrop-filter:blur(2px)}
@@ -80,7 +81,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 .glass .st{border-top:3px solid var(--gold)}
 .glass .sb{background:rgba(255,255,255,.09);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);border-right:1px solid rgba(255,255,255,.22)}
 .glass h2,.glass h3,.glass .big,.glass .logo,.glass .st b{color:#fff}
-.glass .st small,.glass #ltag,.glass small,.glass [style*="color:#777"],.glass [style*="color:#555"]{color:rgba(255,255,255,.72)!important}
+.glass .st small,.glass #ltag,.glass small,.glass [style*="color:var(--tx2)"],.glass [style*="color:var(--tx2)"]{color:rgba(255,255,255,.72)!important}
 .glass input,.glass select,.glass textarea{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.28);color-scheme:dark}
 .glass ::placeholder{color:rgba(255,255,255,.6)}
 .glass option{color:#222}
@@ -115,6 +116,26 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 .licb{background:#fff3cd;color:#7a5b00;border:1px solid #ffe08a;border-radius:12px;padding:9px 12px;margin-bottom:12px;font-size:13px}
 .ft a{display:none;color:var(--gold);font-size:12px;margin:0 0 6px;text-decoration:none}
 #toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,20px);max-width:90vw;background:#2C1810;color:#fff;padding:12px 18px;border-radius:14px;box-shadow:0 8px 30px #0006;opacity:0;transition:all .25s;z-index:1000;pointer-events:none;font-size:14px;border:1px solid rgba(201,169,110,.5)}
+.mask{-webkit-text-security:disc}
+/* ---- dark look and automatic readable text ---- */
+body.dk{--tx:#f1ebe3;--tx2:#b4a799;--hd:#f7f0e7;--card:color-mix(in srgb,var(--bg) 86%,#fff);--cream:color-mix(in srgb,var(--bg) 76%,#fff);--b:rgba(255,255,255,.16);--lk:color-mix(in srgb,var(--gold) 78%,#fff)}
+body.dk .err{color:#fca5a5}
+body.glass{--tx:#fff;--tx2:rgba(255,255,255,.74);--hd:#fff;--card:rgba(255,255,255,.13);--cream:rgba(255,255,255,.12);--b:rgba(255,255,255,.28);--lk:color-mix(in srgb,var(--gold) 70%,#fff)}
+/* ---- extra polish ---- */
+button{position:relative;overflow:hidden}
+.rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:ripple .55s ease-out;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+.card:hover{box-shadow:0 10px 34px color-mix(in srgb,var(--gold) 22%,transparent)}
+.logo{background:linear-gradient(90deg,var(--hd),var(--gold),var(--hd));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+#sname{background:linear-gradient(90deg,#fff,var(--gold),#fff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+/* ---- voice typing ---- */
+#micw{position:fixed;right:16px;bottom:20px;z-index:85;display:flex;gap:8px;align-items:center}
+#micw button{margin:0;border-radius:50%;width:54px;height:54px;padding:0;font-size:22px;box-shadow:0 6px 18px #0005}
+#micw #mlang{width:auto;border-radius:27px;padding:0 15px;font-size:13px;font-weight:700;background:var(--card);color:var(--hd);border:1.5px solid var(--soft)}
+#mic.on{background:#e53935;color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 12px rgba(229,57,53,.25)}}
+@media(max-width:900px){#micw{bottom:calc(88px + env(safe-area-inset-bottom))}}
 </style></head><body>
 
 <div id="bar"></div>
@@ -129,7 +150,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
  <input id="pass" type="password" placeholder="Password">
  <button onclick="signIn()" style="width:100%">Sign In</button>
  <p id="msg" class="err"></p>
- <button type="button" class="o inst" id="inst2" onclick="installApp()" style="margin-top:6px">Install this app</button><p id="ioshint" style="display:none;font-size:12px;color:#777;margin-top:8px">To install on iPhone or iPad: tap the Share button, then Add to Home Screen.</p>
+ <button type="button" class="o inst" id="inst2" onclick="installApp()" style="margin-top:6px">Install this app</button><p id="ioshint" style="display:none;font-size:12px;color:var(--tx2);margin-top:8px">To install on iPhone or iPad: tap the Share button, then Add to Home Screen.</p>
  <a id="linsta" target="_blank" rel="noopener" style="display:none;margin-top:10px;font-size:13px"></a>
 </div></div>
 
@@ -139,6 +160,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
   <div id="nav"></div>
   <div class="ft"><span id="role"></span><br><a id="insta" target="_blank" rel="noopener"></a><br><button class="inst" id="inst" onclick="installApp()">Install app</button> <button onclick="signOut()">Sign out</button></div>
  </nav>
+ <div id="micw"><button type="button" id="mlang" class="o" onmousedown="event.preventDefault()" onclick="setLang()">EN</button><button type="button" id="mic" onmousedown="event.preventDefault()" onclick="toggleMic()" title="Voice typing: tap a text box first">&#127908;</button></div>
  <div id="ov" onclick="toggleNav(false)"></div>
  <nav class="tabs" id="tabs"></nav>
  <div class="main">
@@ -152,7 +174,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
      <div style="display:grid;grid-template-columns:130px 1fr;gap:8px"><select id="dtype" onchange="draw()"><option value="pct">Discount in %</option><option value="amt">Discount in amount</option></select><input id="disc" type="number" min="0" placeholder="Discount (optional)" oninput="draw()"></div>
      <input id="tax" type="number" placeholder="GST / Service charge %" oninput="draw()">
      <select id="csel" onchange="pickClient()"><option value="">Walk-in (no client)</option></select>
-     <div id="cinfo" style="font-size:12px;color:#777"></div>
+     <div id="cinfo" style="font-size:12px;color:var(--tx2)"></div>
      <input id="cphone" placeholder="Client WhatsApp number (for receipt)">
      <select id="method" onchange="$('cash').style.display=this.value==='Split'?'block':'none'"><option value="Cash">Cash</option><option value="Card">Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Split">Split (Cash + Card)</option><option value="Wallet">Client Wallet</option></select>
      <input id="cash" type="number" placeholder="Cash amount (the rest goes on card)" style="display:none">
@@ -175,9 +197,9 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 
   <section class="pg" id="p-comm"><h2>Staff &amp; Commissions</h2>
    <div class="card"><div class="f2"><div>From<input id="cf" type="date"></div><div>To<input id="ct" type="date"></div></div>
-    <button onclick="loadLines()">Show Report</button>
+    <button onclick="loadLines()">Show Report</button> <label style="display:inline-flex;gap:6px;align-items:center;margin-left:10px"><input type="checkbox" id="cshow" style="width:auto;margin:0" onchange="loadLines()"> Show salaries</label>
     <div id="commOut" style="overflow-x:auto"></div>
-    <p style="font-size:12px;color:#777;margin-top:8px">Rates are set in the <b>Staff</b> tab of your Salon sheet (percent or fixed). Advances are entered in Daily Petty Cash (type: Staff advance) and are deducted below.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:8px">Rates are set in the <b>Staff</b> tab of your Salon sheet (percent or fixed). Advances are entered in Daily Petty Cash (type: Staff advance) and are deducted below.</p></div>
   </section>
 
   <section class="pg" id="p-mine"><h2>My Schedule &amp; Stats</h2><div class="card" id="mineOut"></div></section>
@@ -210,7 +232,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
   <section class="pg" id="p-svc"><h2>Services Menu</h2>
    <div class="card"><div class="f2"><input id="vcat" list="vcats" placeholder="Category (Beauty, Aesthetic...)"><input id="vname" placeholder="Service name"><input id="vprice" type="number" placeholder="Price"></div><datalist id="vcats"></datalist>
     <button onclick="saveV()">Save Service</button> <button class="o" onclick="clrV()">Clear</button>
-    <p style="font-size:12px;color:#777;margin-top:6px">To change a price: click Edit, change it, Save. To rename a service: add it under the new name and delete the old one.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:6px">To change a price: click Edit, change it, Save. To rename a service: add it under the new name and delete the old one.</p></div>
    <div class="card" style="overflow-x:auto" id="vlist"></div>
   </section>
 
@@ -229,7 +251,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
    <div class="card"><div class="big" id="rtot"></div><h3>Add a due (money a customer owes you)</h3>
     <div class="f2"><input id="rcl" placeholder="Client name"><input id="rph" placeholder="WhatsApp number"><input id="ram" type="number" placeholder="Amount owed"><input id="rno" placeholder="What for?"></div>
     <button onclick="saveD()">Add Due</button>
-    <p style="font-size:12px;color:#777;margin-top:6px">Bridal balances appear here automatically. The money is counted as revenue when you receive it, so do not also ring the same service up in New Sale.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:6px">Bridal balances appear here automatically. The money is counted as revenue when you receive it, so do not also ring the same service up in New Sale.</p></div>
    <div class="card" style="overflow-x:auto"><div class="f2"><div>Payments are received by<select id="rmeth"><option>Cash</option><option>Card</option><option>Bank Transfer</option></select></div></div><div id="rlist"></div></div>
   </section>
 
@@ -237,7 +259,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
    <div class="card"><div class="f2"><div>Email (their login)<input id="ue" type="email"></div><div>Name<input id="un" placeholder="Staff logins must match a name in the Staff tab"></div>
     <div>Role<select id="ur"><option>Manager</option><option>Staff</option><option>Owner</option></select></div><div>Password<input id="up" type="password" placeholder="At least 8 characters"></div></div>
     <button onclick="saveU()">Save User</button> <button class="o" onclick="clrU()">Clear</button>
-    <p style="font-size:12px;color:#777;margin-top:6px">To change someone's password or role: click Edit, type a new password (leave it empty to keep the old one), and save. They are signed out and must sign in again.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:6px">To change someone's password or role: click Edit, type a new password (leave it empty to keep the old one), and save. They are signed out and must sign in again.</p></div>
    <div class="card" style="overflow-x:auto" id="ulist"></div>
   </section>
 
@@ -250,35 +272,40 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
     <h3>Ready-made themes (click one)</h3><div id="bpre" style="display:flex;flex-wrap:wrap;gap:8px"></div>
     <h3>Or choose your own colours</h3>
     <div class="f2"><div>Main colour (sidebar and buttons)<input id="bc1" type="color" oninput="liveBrand()"></div><div>Accent colour<input id="bc2" type="color" oninput="liveBrand()"></div>
-     <div>Page background<input id="bc3" type="color" oninput="liveBrand()"></div><div>Look<select id="bs" onchange="liveBrand()"><option value="solid">Solid</option><option value="glass">Glass (frosted, animated)</option></select></div><div>Heading style<select id="bf" onchange="liveBrand()"><option value="elegant">Elegant</option><option value="classic">Classic serif</option><option value="modern">Modern</option></select></div></div>
-    <p style="font-size:12px;color:#777">Tip: choose a dark Main colour and a light Page background so everything stays easy to read. You can see the changes live as you pick.</p>
-    <h3>Logo (JPEG, PNG or PDF)</h3><img id="lprev" alt="" style="display:none;max-height:90px;margin:6px 0"><input id="lfile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" onchange="pickLogo(this)"><p id="lstat" style="font-size:12px;color:#777"></p>
+     <div>Page background<input id="bc3" type="color" oninput="liveBrand()"></div><div>Look<select id="bs" onchange="liveBrand()"><option value="solid">Solid</option><option value="glass">Glass (frosted, animated)</option><option value="dark">Dark (easy on the eyes)</option></select></div>
+     <div>Text colour<select id="btx" onchange="liveBrand()"><option value="">Automatic (always readable)</option><option value="custom">My own colour</option></select></div><div>Your text colour<input id="btc" type="color" value="#1a1a1a" oninput="$('btx').value='custom';liveBrand()"></div><div>Heading style<select id="bf" onchange="liveBrand()"><option value="elegant">Elegant</option><option value="classic">Classic serif</option><option value="modern">Modern</option></select></div></div>
+    <p style="font-size:12px;color:var(--tx2)">Tip: choose a dark Main colour and a light Page background so everything stays easy to read. You can see the changes live as you pick.</p>
+    <h3>Logo (JPEG, PNG or PDF)</h3><img id="lprev" alt="" style="display:none;max-height:90px;margin:6px 0"><input id="lfile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" onchange="pickLogo(this)"><p id="lstat" style="font-size:12px;color:var(--tx2)"></p>
     <button class="o" type="button" onclick="removeLogo()">Remove logo</button> <button type="button" onclick="saveBrand()">Save Branding</button>
-    <h3>Install as a phone app (once per salon)</h3><p style="font-size:12px;color:#777">After you have saved your name and logo, click this to get the files that make the installed app show your name and logo. Upload them to your website once.</p>
-    <button class="o" type="button" onclick="makeAppFiles()">Create app files</button><p id="astat" style="font-size:12px;color:#777"></p></div>
+    <h3>Install as a phone app (once per salon)</h3><p style="font-size:12px;color:var(--tx2)">After you have saved your name and logo, click this to get the files that make the installed app show your name and logo. Upload them to your website once.</p>
+    <button class="o" type="button" onclick="makeAppFiles()">Create app files</button><p id="astat" style="font-size:12px;color:var(--tx2)"></p></div>
   </section>
 
   <section class="pg" id="p-imp"><h2>Import Data</h2>
    <div class="card"><div>What are you importing?<select id="itgt" onchange="impHint()"><option value="services">Services menu</option><option value="staff">Staff and commission rates</option><option value="products">Inventory products</option><option value="batches">Stock batches</option><option value="usage">Stock used per service</option><option value="clients">Clients</option></select></div>
-    <p id="ihint" style="font-size:12px;color:#555;margin:6px 0"></p>
+    <p id="ihint" style="font-size:12px;color:var(--tx2);margin:6px 0"></p>
     <button class="o" type="button" onclick="impTpl()">Download a blank template (CSV)</button>
     <h3>Choose your file (CSV or Excel)</h3><input id="ifile" type="file" accept=".csv,.xlsx,.xls" onchange="impFile(this)"><div id="iprev" style="overflow-x:auto;margin:8px 0"></div>
     <button type="button" onclick="doImport()">Import</button><div id="ires" style="margin-top:8px"></div>
-    <p style="font-size:12px;color:#777;margin-top:8px">Best order: Services, Staff, Products, Stock batches, Stock used per service, then Clients. Existing services, staff and usage rows with the same name are updated. Clients and products that already exist are skipped.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:8px">Best order: Services, Staff, Products, Stock batches, Stock used per service, then Clients. Existing services, staff and usage rows with the same name are updated. Clients and products that already exist are skipped.</p></div>
   </section>
 
   <section class="pg" id="p-docs"><h2>Documents</h2>
    <div class="card"><div class="f2"><div>Type of document<select id="dcat" onchange="docCat()"></select></div><div>Belongs to<select id="dlt" onchange="docWho()"><option value="staff">Staff member</option><option value="client">Client</option><option value="">Nobody (general)</option></select></div>
     <div id="dnmw">Person<select id="dnm"></select></div><div>Note (optional)<input id="dno" maxlength="200"></div></div>
-    <input id="dfile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,image/*"><button type="button" onclick="docUp()">Upload</button><p id="dstat" style="font-size:12px;color:#777"></p>
-    <p style="font-size:12px;color:#777">PDF, photos, Word and text files up to 8 MB. Large photos are shrunk automatically. Files are kept privately in your Google Drive and are opened only through this portal. Staff CVs and staff documents are for the Owner only; Managers see client documents and consent forms.</p></div>
+    <input id="dfile" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.txt,image/*"><button type="button" onclick="docUp()">Upload</button><p id="dstat" style="font-size:12px;color:var(--tx2)"></p>
+    <p style="font-size:12px;color:var(--tx2)">PDF, photos, Word and text files up to 8 MB. Large photos are shrunk automatically. Files are kept privately in your Google Drive and are opened only through this portal. Staff CVs and staff documents are for the Owner only; Managers see client documents and consent forms.</p></div>
    <div class="card" style="overflow-x:auto"><div class="f2"><input id="dq" placeholder="Search name, person or type" oninput="showDocs()"><select id="dfc" onchange="showDocs()"></select></div><div id="dlist"></div></div>
   </section>
 
   <section class="pg" id="p-staff"><h2>Staff Members</h2>
-   <div class="card"><div class="f2"><div>Name<input id="stn" maxlength="40"></div><div>Commission type<select id="stt"><option value="percent">Percent of the service price</option><option value="fixed">Fixed amount per service</option></select></div><div>Commission value<input id="stv" type="number" min="0" placeholder="e.g. 10 for 10%"></div></div>
+   <div class="card"><div class="f2"><div>Name<input id="stn" maxlength="40"></div><div>Designation (job title)<input id="stj" maxlength="40" placeholder="e.g. Senior Stylist, Receptionist, Cleaner"></div>
+    <div>Pay type<select id="stt" onchange="stPay()"><option value="percent">Commission: percent of the service price</option><option value="fixed">Commission: fixed amount per service</option><option value="none">No commission (does not do services)</option></select></div>
+    <div id="stvw">Commission value<input id="stv" type="number" min="0" placeholder="e.g. 10 for 10%"></div>
+    <div>Monthly salary (optional, private)<input id="sts" class="mask" inputmode="decimal" autocomplete="off" placeholder="Only the Owner can see this"></div>
+    <div style="align-self:end"><label style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><input type="checkbox" style="width:auto;margin:0" onchange="$('sts').classList.toggle('mask',!this.checked)"> Show salary while typing</label></div></div>
     <button onclick="saveSt()">Save Staff Member</button> <button class="o" onclick="clrSt()">Clear</button>
-    <p style="font-size:12px;color:#777;margin-top:6px">To change someone's commission: click Edit, change it and save. To rename someone: add the new name and delete the old one. Past sales and reports keep their name.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:6px">To change someone's commission: click Edit, change it and save. To rename someone: add the new name and delete the old one. Past sales and reports keep their name.</p></div>
    <div class="card" style="overflow-x:auto" id="stlist"></div>
   </section>
 
@@ -287,27 +314,27 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
     <div>Currency label (shown before amounts)<input id="scur" maxlength="6" placeholder="e.g. Rs, AED, $"></div><div>Phone country code for WhatsApp<input id="scc" maxlength="4" placeholder="e.g. 92"></div></div>
     <h3>Sales</h3><div class="f2"><div>Default GST / service charge %<input id="stax" type="number" min="0" max="100"></div><div>Extra payment methods (separate with commas)<input id="smeth" placeholder="Easypaisa, JazzCash"></div></div>
     <h3>Receipts and Instagram</h3><input id="snote" maxlength="200" placeholder="Message at the bottom of every receipt (optional)"><input id="sig" placeholder="Instagram: @yoursalon or your Instagram page link">
-    <p style="font-size:12px;color:#777">Your Instagram is shown on the sign-in page, in the menu and at the bottom of WhatsApp receipts. It links to your page. It does not post to Instagram or read anything from it.</p>
+    <p style="font-size:12px;color:var(--tx2)">Your Instagram is shown on the sign-in page, in the menu and at the bottom of WhatsApp receipts. It links to your page. It does not post to Instagram or read anything from it.</p>
     <button onclick="saveSet()">Save Settings</button>
-    <p style="font-size:12px;color:#777;margin-top:8px">Salon name, logo and colours are under Brand &amp; Theme.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:8px">Salon name, logo and colours are under Brand &amp; Theme.</p></div>
   </section>
 
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
     <h3>New product</h3><div class="f2"><input id="np" placeholder="Name (e.g. Botox 100u)"><input id="nu" placeholder="Unit (ml, vial, pcs)"><input id="nl" type="number" placeholder="Low-stock alert at"></div><button onclick="addP()">Add Product</button>
-    <p style="font-size:12px;color:#777;margin-top:8px">How much product each service uses is set in the <b>Usage</b> tab of your Salon sheet (one row per product per service). Stock is taken automatically at checkout, oldest expiry first; expired batches are never used.</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:8px">How much product each service uses is set in the <b>Usage</b> tab of your Salon sheet (one row per product per service). Stock is taken automatically at checkout, oldest expiry first; expired batches are never used.</p></div>
   </section>
 
   <section class="pg" id="p-exp"><h2>Expenses</h2>
    <div class="card"><div class="f2"><input id="ecat" placeholder="Category (rent, supplies...)"><input id="eamt" type="number" placeholder="Amount"></div><input id="enote" placeholder="Note"><button onclick="addE()">Add Expense</button>
-    <p style="font-size:12px;color:#777;margin-top:6px">Manager entries wait as Pending until the Owner approves them. This month:</p></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:6px">Manager entries wait as Pending until the Owner approves them. This month:</p></div>
    <div class="card" style="overflow-x:auto" id="elist"></div>
   </section>
 
   <section class="pg" id="p-petty"><h2>Daily Petty Cash</h2>
    <div class="card"><div class="big" id="pbal"></div><div class="f2"><select id="pty"><option value="Out">Cash out (daily expense)</option><option value="In">Cash in (top-up)</option><option value="Advance">Staff advance</option></select><input id="pamt" type="number" placeholder="Amount"><select id="pst"></select><input id="pno" placeholder="Note"></div>
-    <p style="font-size:12px;color:#777">The staff box is only used for "Staff advance".</p><button onclick="addPc()">Save</button></div>
+    <p style="font-size:12px;color:var(--tx2)">The staff box is only used for "Staff advance".</p><button onclick="addPc()">Save</button></div>
    <div class="card" style="overflow-x:auto" id="plist"></div>
   </section>
 
@@ -332,7 +359,9 @@ const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
 function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;t.style.transform='translate(-50%,0)';clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;t.style.transform='translate(-50%,20px)'},4200)}
-window.alert=m=>toast(String(m));   // friendly pop-up messages instead of the browser's blocking box
+window.alert=m=>toast(String(m));
+const lerp=(a,b,k)=>a+(b-a)*k,hex=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16));
+const mix=(a,b,k)=>{const x=hex(a),y=hex(b);return '#'+x.map((v,i)=>Math.round(lerp(v,y[i],k)).toString(16).padStart(2,'0')).join('')};   // blends two #colours   // friendly pop-up messages instead of the browser's blocking box
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
 let CUR='',SET={},lic=null;
@@ -394,8 +423,8 @@ function go(p){
 function fillLists(){
  showSvc2();
  $('asv').innerHTML=services.map(s=>`<option>${esc(s.name)}</option>`).join('');
- $('ast').innerHTML=staff.map(s=>`<option>${esc(s.name)}</option>`).join('');
- $('psv').innerHTML=$('asv').innerHTML;$('pst').innerHTML=$('ast').innerHTML;
+ $('ast').innerHTML=staff.filter(s=>s.serve!==false).map(sopt).join('');
+ $('psv').innerHTML=$('asv').innerHTML;$('pst').innerHTML=staff.map(sopt).join('');
 }
 let clients=[],tpl={};
 const fill=(t,v)=>String(t||'').replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m);
@@ -404,7 +433,7 @@ function addS(i){cart.push({name:services[i].name,price:services[i].price,staff:
 function draw(){
  const c0=curC();
  $('cart').innerHTML=cart.map((c,i)=>{const pk=c0&&c0.pkgs.find(p=>p.service===c.name);return `<div class="line"><b>${esc(c.name)}</b> - ${c.pkgId?'package session':esc(c.price)} <a href="#" onclick="cart.splice(${i},1);draw();return false">remove</a>
-  <select onchange="cart[${i}].staff=this.value"><option value="">- Specialist -</option>${staff.map(s=>`<option ${s.name===c.staff?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+  <select onchange="cart[${i}].staff=this.value"><option value="">- Specialist -</option>${staff.filter(s=>s.serve!==false).map(s=>`<option value="${esc(s.name)}" ${s.name===c.staff?'selected':''}>${esc(s.name)}${s.title?' ('+esc(s.title)+')':''}</option>`).join('')}</select>
   ${pk?`<label><input type="checkbox" style="width:auto" ${c.pkgId?'checked':''} onchange="cart[${i}].pkgId=this.checked?'${esc(pk.id)}':'';draw()"> Use package (${pk.left} left)</label>`:''}</div>`}).join('');
  const sub=cart.reduce((a,i)=>a+(i.pkgId?0:Number(i.price)),0),dv=Number($('disc').value)||0,d=$('dtype').value==='amt'?Math.min(dv,sub):sub*dv/100;
  $('total').textContent='Total: '+money((sub-d)*(1+(Number($('tax').value)||0)/100));
@@ -463,7 +492,7 @@ function showWa(){
  $('wbd').innerHTML=bd.map(x=>`<div class="line">${esc(x.c.name)} - ${x.n?'in '+x.n+' days':'TODAY'} <a target="_blank" rel="noopener" href="${waLink(x.c.phone,fill(tpl.birthday,{name:x.c.name}))}">Send wishes</a></div>`).join('')||'<p>None.</p>';
  const ms=clients.filter(c=>c.last&&(Date.now()-new Date(c.last))/864e5>60);
  $('wmiss').innerHTML=ms.map(c=>`<div class="line">${esc(c.name)} - last visit ${esc(c.last)} <a target="_blank" rel="noopener" href="${waLink(c.phone,fill(tpl.miss,{name:c.name}))}">Send message</a></div>`).join('')||'<p>None.</p>';
- $('wtpl').innerHTML=user&&user.role==='Owner'?'<h3>Message templates</h3><p style="font-size:12px;color:#777">You can use: {name} {service} {date} {time} {id} {items} {total} {method}</p>'+['confirm','remind','receipt','miss','birthday'].map(k=>`<b>${k}</b><textarea id="t_${k}" rows="3">${esc(tpl[k]||'')}</textarea><button class="sm" onclick="saveT('${k}')">Save</button><br>`).join(''):'';
+ $('wtpl').innerHTML=user&&user.role==='Owner'?'<h3>Message templates</h3><p style="font-size:12px;color:var(--tx2)">You can use: {name} {service} {date} {time} {id} {items} {total} {method}</p>'+['confirm','remind','receipt','miss','birthday'].map(k=>`<b>${k}</b><textarea id="t_${k}" rows="3">${esc(tpl[k]||'')}</textarea><button class="sm" onclick="saveT('${k}')">Save</button><br>`).join(''):'';
 }
 async function saveT(k){try{await api('saveTemplate',{key:k,text:$('t_'+k).value});tpl[k]=$('t_'+k).value;alert('Saved')}catch(e){alert(e.message)}}
 let invT='',invSoon='',invL=[],repData=null;
@@ -494,7 +523,7 @@ async function addPc(){try{await api('addPetty',{type:$('pty').value,amount:$('p
 async function loadRep(){
  try{const r=await api('report',{from:$('rf').value,to:$('rt').value});repData=r;
   const cost=r.expenses+r.petty+r.commission,net=r.revenue-cost,row=(a,b,x)=>`<tr><td>${a}</td><td style="text-align:right">${x?'<b>'+b+'</b>':b}</td></tr>`;
-  $('repout').innerHTML='<table>'+row('Revenue',money(r.revenue))+row('Approved expenses',money(r.expenses))+row('Petty cash outlays',money(r.petty))+row('Staff commissions',money(r.commission))+row('Net profit',money(net),1)+row('ROI (profit / costs)',cost>0?(net/cost*100).toFixed(1)+'%':'-')+'</table><h3>Top services</h3><table><tr><th>Service</th><th>Times sold</th><th>Sales</th></tr>'+Object.keys(r.top).sort((a,b)=>r.top[b].rev-r.top[a].rev).map(k=>`<tr><td>${esc(k)}</td><td>${r.top[k].n}</td><td>${money(r.top[k].rev)}</td></tr>`).join('')+'</table><p style="font-size:12px;color:#777;margin-top:8px">Profit = revenue minus approved expenses, petty cash outlays and commissions. Wallet top-ups count as revenue only when spent. Staff advances are not costs: they are deducted from payouts.</p>';
+  $('repout').innerHTML='<table>'+row('Revenue',money(r.revenue))+row('Approved expenses',money(r.expenses))+row('Petty cash outlays',money(r.petty))+row('Staff commissions',money(r.commission))+row('Net profit',money(net),1)+row('ROI (profit / costs)',cost>0?(net/cost*100).toFixed(1)+'%':'-')+'</table><h3>Top services</h3><table><tr><th>Service</th><th>Times sold</th><th>Sales</th></tr>'+Object.keys(r.top).sort((a,b)=>r.top[b].rev-r.top[a].rev).map(k=>`<tr><td>${esc(k)}</td><td>${r.top[k].n}</td><td>${money(r.top[k].rev)}</td></tr>`).join('')+'</table><p style="font-size:12px;color:var(--tx2);margin-top:8px">Profit = revenue minus approved expenses, petty cash outlays and commissions. Wallet top-ups count as revenue only when spent. Staff advances are not costs: they are deducted from payouts.</p>';
  }catch(e){alert(e.message)}
 }
 function csv(k){
@@ -534,7 +563,7 @@ const hm=m=>Math.floor(m/60)+'h '+('0'+m%60).slice(-2)+'m';
 async function loadAtt(){
  try{const r=await api('attData',{from:$('af1').value,to:$('af2').value});attS=r.staff;attR=r.rows;attT=r.todayRows;
   $('atoday').innerHTML='<table><tr><th>Staff</th><th>Status</th><th></th></tr>'+attS.map((n,i)=>{const rs=attT.filter(x=>x.staff===n),op=rs.find(x=>!x.out);
-   return `<tr><td>${esc(n)}</td><td>${op?tg('IN since '+esc(op.in),'Confirmed'):rs.length?'Done: '+rs.map(x=>esc(x.in)+' - '+esc(x.out)).join(', '):'Not in yet'}</td><td>${op?`<button class="sm o" onclick="clk(${i},'out')">Clock out</button>`:`<button class="sm" onclick="clk(${i},'in')">Clock in</button>`}</td></tr>`}).join('')+'</table>';
+   return `<tr><td>${esc(n)}${r.titles&&r.titles[n]?'<br><small>'+esc(r.titles[n])+'</small>':''}</td><td>${op?tg('IN since '+esc(op.in),'Confirmed'):rs.length?'Done: '+rs.map(x=>esc(x.in)+' - '+esc(x.out)).join(', '):'Not in yet'}</td><td>${op?`<button class="sm o" onclick="clk(${i},'out')">Clock out</button>`:`<button class="sm" onclick="clk(${i},'in')">Clock in</button>`}</td></tr>`}).join('')+'</table>';
   const m={};attR.forEach(x=>{const o=m[x.staff]=m[x.staff]||{days:new Set(),min:0,open:0};o.days.add(x.date);if(x.out)o.min+=Math.max(0,toMin(x.out)-toMin(x.in));else o.open++});
   $('asum').innerHTML='<table><tr><th>Staff</th><th>Days present</th><th>Hours worked</th></tr>'+Object.keys(m).map(k=>`<tr><td>${esc(k)}</td><td>${m[k].days.size}</td><td>${hm(m[k].min)}${m[k].open?' '+tg(m[k].open+' not clocked out','Cancelled'):''}</td></tr>`).join('')+'</table>'
    +'<h3>Log</h3><table><tr><th>Date</th><th>Staff</th><th>In</th><th>Out</th></tr>'+attR.slice().reverse().map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.staff)}</td><td>${esc(x.in)}</td><td>${esc(x.out||'-')}</td></tr>`).join('')+'</table>';
@@ -575,11 +604,15 @@ async function changePw(){
  try{await api('changePassword',{oldPassword:$('pw0').value,newPassword:$('pw1').value});alert('Password changed. Please sign in again with the new password.');setTimeout(signOut,1800)}catch(e){alert(e.message)}
 }
 const FONTS={elegant:"'Cormorant Garamond',serif",classic:"'Playfair Display',serif",modern:"'DM Sans',sans-serif"};
-let brand={name:'SALON POS',tagline:'',dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8',font:'elegant',logo:'',style:'solid',instagram:''};
+let brand={name:'SALON POS',tagline:'',dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8',font:'elegant',logo:'',style:'solid',instagram:'',tx:''};
 function applyBrand(b,pwa){
  brand=Object.assign({},brand,b||{});
  if(brand.logo&&!/^data:image\/(png|jpeg|webp);base64,/.test(brand.logo))brand.logo='';
- const r=document.documentElement.style;r.setProperty('--dk',brand.dk);r.setProperty('--gold',brand.gold);r.setProperty('--bg',brand.bg);r.setProperty('--hf',FONTS[brand.font]||FONTS.elegant);
+ const lum=x=>{const [a,b,c]=hex(x).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*a+.7152*b+.0722*c};
+ const dkE=lum(brand.dk)>.3?mix(brand.dk,'#000000',.55):brand.dk,goldE=lum(brand.gold)<.25?mix(brand.gold,'#ffffff',.45):brand.gold,stl=brand.style,dark=stl==='dark'||(stl==='solid'&&lum(brand.bg)<.4),bgE=stl==='dark'?mix(dkE,'#000000',.45):brand.bg;
+ const r=document.documentElement.style;r.setProperty('--dk',dkE);r.setProperty('--gold',goldE);r.setProperty('--bg',bgE);
+ {const b0=document.body.style;if(brand.tx){b0.setProperty('--tx',brand.tx);b0.setProperty('--hd',brand.tx);b0.setProperty('--tx2',mix(brand.tx,dark?'#000000':'#ffffff',.35))}else['--tx','--hd','--tx2'].forEach(p=>b0.removeProperty(p))}
+ document.body.classList.toggle('dk',dark&&stl!=='glass');r.setProperty('--hf',FONTS[brand.font]||FONTS.elegant);
  $('sname').textContent=$('lname').textContent=brand.name||'SALON POS';$('ltag').textContent=brand.tagline||'SIGN IN';
  ['slogo','llogo'].forEach(id=>{const i=$(id);i.style.display=brand.logo?'block':'none';if(brand.logo)i.src=brand.logo});
  document.title=brand.name||'Salon POS';{const lk=$('linsta');if(brand.instagram){lk.href='https://instagram.com/'+encodeURIComponent(brand.instagram);lk.textContent='Follow @'+brand.instagram+' on Instagram';lk.style.display='inline-block'}else lk.style.display='none'}$('mname').textContent=brand.name||'SALON POS';document.body.classList.toggle('glass',brand.style==='glass');
@@ -595,12 +628,12 @@ async function loadBrandFor(id){
 const PRESETS={'Classic Gold':{dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8'},'Rose Blush':{dk:'#4A1D33',gold:'#E8A0B4',bg:'#FBF0F3'},'Emerald Spa':{dk:'#0F3D33',gold:'#D4B26A',bg:'#EEF5F1'},'Midnight Luxe':{dk:'#1B1B2F',gold:'#C8A2E8',bg:'#F1F0F7'},'Ocean Breeze':{dk:'#12324A',gold:'#7FC8D6',bg:'#EDF4F7'}};
 let bLogo;
 function initBrandForm(){
- $('bn').value=brand.name;$('btg').value=brand.tagline||'';$('bc1').value=brand.dk;$('bc2').value=brand.gold;$('bc3').value=brand.bg;$('bf').value=brand.font;$('bs').value=brand.style||'solid';bLogo=undefined;
+ $('bn').value=brand.name;$('btg').value=brand.tagline||'';$('bc1').value=brand.dk;$('bc2').value=brand.gold;$('bc3').value=brand.bg;$('bf').value=brand.font;$('bs').value=brand.style||'solid';$('btx').value=brand.tx?'custom':'';$('btc').value=brand.tx||'#1a1a1a';bLogo=undefined;
  $('bpre').innerHTML=Object.keys(PRESETS).map(k=>`<button type="button" class="sw" style="background:linear-gradient(135deg,${PRESETS[k].dk} 55%,${PRESETS[k].gold})" onclick="preset('${k}')">${k}</button>`).join('');
  $('lprev').style.display=brand.logo?'block':'none';if(brand.logo)$('lprev').src=brand.logo;$('lstat').textContent='';
 }
 function preset(k){const p=PRESETS[k];$('bc1').value=p.dk;$('bc2').value=p.gold;$('bc3').value=p.bg;liveBrand()}
-function liveBrand(){applyBrand({name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value,style:$('bs').value})}
+function liveBrand(){applyBrand({name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value,style:$('bs').value,tx:$('btx').value==='custom'?$('btc').value:''})}
 const LS={};
 function loadScript(src){return LS[src]||(LS[src]=new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>{delete LS[src];no(new Error('Could not load a helper file. Check your internet connection.'))};document.head.appendChild(s)}))}
 function trimCanvas(c){
@@ -635,19 +668,19 @@ async function pickLogo(inp){
 }
 function removeLogo(){bLogo='';applyBrand({logo:''});$('lprev').style.display='none';$('lfile').value='';$('lstat').textContent='Logo removed. Click Save Branding to keep this.'}
 async function saveBrand(){
- try{const o={name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value,style:$('bs').value};if(bLogo!==undefined)o.logo=bLogo;
+ try{const o={name:$('bn').value,tagline:$('btg').value,dk:$('bc1').value,gold:$('bc2').value,bg:$('bc3').value,font:$('bf').value,style:$('bs').value,tx:$('btx').value==='custom'?$('btc').value:''};if(bLogo!==undefined)o.logo=bLogo;
   await api('saveBrand',o);bLogo=undefined;fetchBrand();alert('Branding saved');
  }catch(e){alert(e.message)}
 }
 const IMP={
  services:{cols:['Category','Name','Price'],ex:['Beauty','Haircut','2000'],note:'One row per service.'},
- staff:{cols:['Name','CommType','CommValue'],ex:['Ayesha','percent','10'],note:'CommType is either percent or fixed.'},
+ staff:{cols:['Name','Designation','CommType','CommValue','Salary'],ex:['Ayesha','Stylist','percent','10','60000'],opt:['Designation','CommValue','Salary'],note:'CommType is percent, fixed or none (none = no commission, CommValue can be empty). Salary is optional and stays private.'},
  products:{cols:['Name','Unit','LowAt'],ex:['Serum','ml','50'],opt:['Unit','LowAt'],note:'LowAt is the stock level that triggers the low-stock warning.'},
  batches:{cols:['Product','BatchNo','Expiry','Qty'],ex:['Serum','SR-001','2027-06-30','200'],opt:['Expiry'],note:'Product names must already exist in Inventory. Dates like 2027-06-30 or 30/06/2027.'},
  usage:{cols:['Service','Product','Qty'],ex:['HydraFacial','Serum','5'],note:'How much of a product ONE service uses. Services and products must already exist.'},
  clients:{cols:['Name','Phone','Birthday','Notes'],ex:['Sara Khan','03001234567','1992-05-14','Prefers mornings'],opt:['Phone','Birthday','Notes'],note:'Birthday as 1992-05-14 or 14/05/1992.'}
 };
-const IAL={name:['fullname','clientname','servicename','staffname','productname','item','client','customer'],phone:['mobile','whatsapp','number','contact','phoneno','mobileno'],price:['rate','cost','amount','charges'],category:['group','type','department'],birthday:['dob','dateofbirth','birthdate','bday'],notes:['note','remarks','comment','comments'],commtype:['type','commissiontype'],commvalue:['commission','value','rate'],unit:['uom'],lowat:['lowstock','alertlevel','minimum','min'],batchno:['batch','batchnumber','lot'],expiry:['expirydate','exp'],qty:['quantity','stock','amount']};
+const IAL={designation:['title','jobtitle','position','role'],salary:['monthlysalary','wage','pay'],name:['fullname','clientname','servicename','staffname','productname','item','client','customer'],phone:['mobile','whatsapp','number','contact','phoneno','mobileno'],price:['rate','cost','amount','charges'],category:['group','type','department'],birthday:['dob','dateofbirth','birthdate','bday'],notes:['note','remarks','comment','comments'],commtype:['type','commissiontype'],commvalue:['commission','value','rate'],unit:['uom'],lowat:['lowstock','alertlevel','minimum','min'],batchno:['batch','batchnumber','lot'],expiry:['expirydate','exp'],qty:['quantity','stock','amount']};
 let impRows=[];
 function impHint(){const s=IMP[$('itgt').value];$('ihint').textContent='Columns needed: '+s.cols.join(', ')+'. '+s.note;$('iprev').innerHTML='';$('ires').innerHTML='';impRows=[];$('ifile').value=''}
 function dl(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type:'text/csv'}));a.download=name;a.click()}
@@ -754,11 +787,14 @@ function showGS(){
  g.style.display='block';g.innerHTML='<h3>Getting started</h3>'+it.map(x=>`<div class="line">${x[1]?'\u2705 <s>'+x[0]+'</s>':'\u2B1C <a href="#" onclick="go(\''+x[2]+'\');return false">'+x[0]+'</a>'}</div>`).join('');
 }
 let stL=[];
-async function loadStaff(){try{stL=(await api('staffList')).staff;$('stlist').innerHTML='<table><tr><th>Name</th><th>Commission</th><th></th></tr>'+stL.map((s,i)=>`<tr><td><b>${esc(s.name)}</b></td><td>${s.type==='fixed'?money(s.value)+' per service':s.value+'%'}</td><td><button class="sm o" onclick="editSt(${i})">Edit</button><button class="sm o" onclick="giveLogin(${i})">Give login</button><button class="sm o" onclick="delSt(${i})">Delete</button></td></tr>`).join('')+'</table>'}catch(e){alert(e.message)}}
-function editSt(i){const s=stL[i];$('stn').value=s.name;$('stt').value=s.type;$('stv').value=s.value;scrollTo(0,0)}
-function clrSt(){$('stn').value='';$('stv').value='';$('stt').value='percent'}
+const sopt=s=>`<option value="${esc(s.name)}">${esc(s.name)}${s.title?' ('+esc(s.title)+')':''}</option>`;
+const payLbl=s=>s.type==='none'?'No commission':s.type==='fixed'?'Commission '+money(s.value)+' per service':'Commission '+s.value+'%';
+async function loadStaff(){try{stL=(await api('staffList')).staff;$('stlist').innerHTML='<table><tr><th>Name</th><th>Pay</th><th>Salary</th><th></th></tr>'+stL.map((s,i)=>`<tr><td><b>${esc(s.name)}</b><br><small>${esc(s.title||'No designation')}</small></td><td>${esc(payLbl(s))}</td><td>${s.salary!==''?'&#128274; private':'-'}</td><td><button class="sm o" onclick="editSt(${i})">Edit</button><button class="sm o" onclick="giveLogin(${i})">Give login</button><button class="sm o" onclick="delSt(${i})">Delete</button></td></tr>`).join('')+'</table>'}catch(e){alert(e.message)}}
+function stPay(){$('stvw').style.display=$('stt').value==='none'?'none':'block'}
+function editSt(i){const s=stL[i];$('stn').value=s.name;$('stj').value=s.title||'';$('stt').value=s.type;$('stv').value=s.value;$('sts').value=s.salary;stPay();scrollTo(0,0)}
+function clrSt(){['stn','stj','stv','sts'].forEach(i=>$(i).value='');$('stt').value='percent';stPay()}
 async function refreshStaffLists(){try{const d=await api('getData');staff=d.staff;fillLists()}catch(e){}}
-async function saveSt(){try{await api('saveStaff',{name:$('stn').value,type:$('stt').value,value:$('stv').value});clrSt();alert('Staff member saved');await loadStaff();refreshStaffLists()}catch(e){alert(e.message)}}
+async function saveSt(){try{await api('saveStaff',{name:$('stn').value,title:$('stj').value,type:$('stt').value,value:$('stv').value,salary:$('sts').value});clrSt();alert('Staff member saved');await loadStaff();refreshStaffLists()}catch(e){alert(e.message)}}
 async function delSt(i){if(!confirm('Delete '+stL[i].name+'? Past sales and reports keep their name. If they have a login, delete it too under Users & Passwords.'))return;try{await api('deleteStaff',{name:stL[i].name});await loadStaff();refreshStaffLists()}catch(e){alert(e.message)}}
 function giveLogin(i){go('users');$('un').value=stL[i].name;$('ur').value='Staff';$('ue').focus()}
 function initSettings(){$('sphone').value=SET.phone||'';$('saddr').value=SET.address||'';$('scur').value=SET.currency||'';$('scc').value=SET.cc||'';$('stax').value=SET.taxPct||'';$('smeth').value=SET.methods||'';$('snote').value=SET.receiptNote||'';$('sig').value=SET.instagram?'@'+SET.instagram:''}
@@ -784,7 +820,8 @@ async function loadLines(){
   if(own){
    const m={};r.lines.forEach(l=>{const k=l.staff||'(no specialist)';m[k]=m[k]||{n:0,net:0,c:0};m[k].n++;m[k].net+=l.net;m[k].c+=l.comm});
    Object.keys(r.adv).forEach(k=>{m[k]=m[k]||{n:0,net:0,c:0}});
-   $('commOut').innerHTML='<table><tr><th>Specialist</th><th>Services</th><th>Gross sales</th><th>Commission</th><th>Advances</th><th>Net payout</th></tr>'+Object.keys(m).map(k=>{const a=r.adv[k]||0;return `<tr><td>${esc(k)}</td><td>${m[k].n}</td><td>${money(m[k].net)}</td><td>${money(m[k].c)}</td><td>${money(a)}</td><td><b>${money(m[k].c-a)}</b></td></tr>`}).join('')+'</table>';
+   const show=$('cshow').checked,sal={};if(show){try{(await api('staffList')).staff.forEach(s=>{if(s.salary!==''){sal[s.name]=s.salary;m[s.name]=m[s.name]||{n:0,net:0,c:0}}})}catch(e){}}
+   $('commOut').innerHTML='<table><tr><th>Specialist</th><th>Services</th><th>Gross sales</th><th>Commission</th><th>Advances</th><th>Net commission</th>'+(show?'<th>Monthly salary</th><th>Estimated pay</th>':'')+'</tr>'+Object.keys(m).map(k=>{const a=r.adv[k]||0;return `<tr><td>${esc(k)}</td><td>${m[k].n}</td><td>${money(m[k].net)}</td><td>${money(m[k].c)}</td><td>${money(a)}</td><td><b>${money(m[k].c-a)}</b></td>${show?`<td>${sal[k]!==undefined?money(sal[k]):'-'}</td><td><b>${money((sal[k]||0)+m[k].c-a)}</b></td>`:''}</tr>`}).join('')+'</table>'+(show?'<p style="font-size:12px;color:var(--tx2)">Estimated pay = monthly salary + commission - advances for the dates chosen.</p>':'');
   }else{
    const n=r.lines.reduce((a,l)=>a+l.net,0),c=r.lines.reduce((a,l)=>a+l.comm,0);
    $('mineOut').innerHTML=`<p class="big">This month: ${r.lines.length} services, sales ${money(n)}, commission ${money(c)}</p><h3>Upcoming appointments</h3>`+
@@ -831,6 +868,24 @@ async function makeAppFiles(){
  }catch(e){$('astat').textContent='';alert(e.message)}
 }
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+let micOn=false,mrec=null,micTarget=null,micLang=(()=>{try{return localStorage.getItem('micLang')||'en-US'}catch(e){return 'en-US'}})();
+document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.matches&&t.matches('input:not([type]),input[type=text],input[type=search],input[type=email],textarea'))micTarget=t});
+function setLang(){micLang=micLang==='en-US'?'ur-PK':'en-US';try{localStorage.setItem('micLang',micLang)}catch(e){}$('mlang').textContent=micLang==='ur-PK'?'\u0627\u0631\u062F\u0648':'EN';alert(micLang==='ur-PK'?'Voice typing will write in Urdu':'Voice typing will write in English')}
+function toggleMic(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR)return alert('Voice typing is not supported in this browser. Please use Google Chrome, or the microphone key on your phone keyboard.');
+ if(micOn){mrec.stop();return}
+ if(!micTarget)return alert('First tap the box you want to fill, then press the microphone.');
+ const el=micTarget,base=el.value;mrec=new SR();mrec.lang=micLang;mrec.interimResults=true;mrec.continuous=false;
+ mrec.onstart=()=>{micOn=true;$('mic').classList.add('on')};
+ mrec.onresult=e=>{let txt='';for(let i=0;i<e.results.length;i++)txt+=e.results[i][0].transcript;el.value=(base?base+' ':'')+txt;el.dispatchEvent(new Event('input',{bubbles:true}))};
+ mrec.onerror=e=>alert(e.error==='not-allowed'||e.error==='service-not-allowed'?'Please allow the microphone for this website.':e.error==='no-speech'?'I did not hear anything. Please try again.':'Voice typing problem: '+e.error);
+ mrec.onend=()=>{micOn=false;$('mic').classList.remove('on')};
+ try{mrec.start()}catch(e){}
+}
+document.querySelectorAll('input:not([type]),input[type=text],input[type=search],textarea').forEach(e=>e.setAttribute('dir','auto'));
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;const r=b.getBoundingClientRect(),s=document.createElement('span'),d=Math.max(r.width,r.height)/3;s.className='rip';s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';b.appendChild(s);setTimeout(()=>s.remove(),600)});
+$('mlang').textContent=micLang==='ur-PK'?'\u0627\u0631\u062F\u0648':'EN';
 // restore the login after a page refresh (runs last, once everything above is defined)
 (function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){salonUrl=sv.salonUrl;token=sv.token;user=sv.user;lic=sv.lic||null;start()}}catch(e){}})();
 </script></body></html>
