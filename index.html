@@ -111,11 +111,16 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 }
 @media(max-width:700px){.grid,.f2{grid-template-columns:1fr!important}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.licb{background:#fff3cd;color:#7a5b00;border:1px solid #ffe08a;border-radius:12px;padding:9px 12px;margin-bottom:12px;font-size:13px}
+.ft a{display:none;color:var(--gold);font-size:12px;margin:0 0 6px;text-decoration:none}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,20px);max-width:90vw;background:#2C1810;color:#fff;padding:12px 18px;border-radius:14px;box-shadow:0 8px 30px #0006;opacity:0;transition:all .25s;z-index:1000;pointer-events:none;font-size:14px;border:1px solid rgba(201,169,110,.5)}
 </style></head><body>
 
 <div id="bar"></div>
 <div id="offl">You are offline. Check your internet connection.</div>
-<div id="lock"><b>Account Suspended</b><br>Contact Administrator</div>
+<div id="lock"><b id="lockT">Account Suspended</b><br><span id="lockS">Contact Administrator</span></div>
+<div id="toast"></div>
 
 <div id="login"><div class="card">
  <img id="llogo" alt="" style="display:none"><div class="logo" id="lname">SALON POS</div><p id="ltag">SIGN IN</p>
@@ -125,24 +130,26 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
  <button onclick="signIn()" style="width:100%">Sign In</button>
  <p id="msg" class="err"></p>
  <button type="button" class="o inst" id="inst2" onclick="installApp()" style="margin-top:6px">Install this app</button><p id="ioshint" style="display:none;font-size:12px;color:#777;margin-top:8px">To install on iPhone or iPad: tap the Share button, then Add to Home Screen.</p>
+ <a id="linsta" target="_blank" rel="noopener" style="display:none;margin-top:10px;font-size:13px"></a>
 </div></div>
 
 <div id="app">
  <nav class="sb" id="sb">
   <div class="br"><img id="slogo" alt="" style="display:none"><span id="sname">SALON POS</span><small id="who"></small></div>
   <div id="nav"></div>
-  <div class="ft"><span id="role"></span><br><button class="inst" id="inst" onclick="installApp()">Install app</button> <button onclick="signOut()">Sign out</button></div>
+  <div class="ft"><span id="role"></span><br><a id="insta" target="_blank" rel="noopener"></a><br><button class="inst" id="inst" onclick="installApp()">Install app</button> <button onclick="signOut()">Sign out</button></div>
  </nav>
  <div id="ov" onclick="toggleNav(false)"></div>
  <nav class="tabs" id="tabs"></nav>
  <div class="main">
   <div class="mbar"><button type="button" onclick="toggleNav(true)">&#9776;</button><span id="mname">SALON POS</span></div>
+  <div id="licb" class="licb" style="display:none"></div>
 
   <section class="pg" id="p-sale"><h2>New Sale</h2>
    <div class="grid">
-    <div class="card"><h3>Services</h3><div id="services"></div></div>
+    <div class="card"><h3>Services</h3><input id="svq" placeholder="Search services..." oninput="showSvc2()"><div id="svcats" class="chips"></div><div id="services"></div></div>
     <div class="card"><h3>Cart</h3><div id="cart"></div>
-     <input id="disc" type="number" placeholder="Discount %" oninput="draw()">
+     <div style="display:grid;grid-template-columns:130px 1fr;gap:8px"><select id="dtype" onchange="draw()"><option value="pct">Discount in %</option><option value="amt">Discount in amount</option></select><input id="disc" type="number" min="0" placeholder="Discount (optional)" oninput="draw()"></div>
      <input id="tax" type="number" placeholder="GST / Service charge %" oninput="draw()">
      <select id="csel" onchange="pickClient()"><option value="">Walk-in (no client)</option></select>
      <div id="cinfo" style="font-size:12px;color:#777"></div>
@@ -195,6 +202,7 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 
   <section class="pg" id="p-dash"><h2>Dashboard</h2>
    <div class="stats" id="dstats"></div>
+   <div class="card" id="gstart" style="display:none"></div>
    <div class="grid"><div class="card"><h3>Today's appointments</h3><div id="dappt"></div></div>
    <div class="card"><h3>Needs attention</h3><div id="dalert"></div></div></div>
   </section>
@@ -267,6 +275,23 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
    <div class="card" style="overflow-x:auto"><div class="f2"><input id="dq" placeholder="Search name, person or type" oninput="showDocs()"><select id="dfc" onchange="showDocs()"></select></div><div id="dlist"></div></div>
   </section>
 
+  <section class="pg" id="p-staff"><h2>Staff Members</h2>
+   <div class="card"><div class="f2"><div>Name<input id="stn" maxlength="40"></div><div>Commission type<select id="stt"><option value="percent">Percent of the service price</option><option value="fixed">Fixed amount per service</option></select></div><div>Commission value<input id="stv" type="number" min="0" placeholder="e.g. 10 for 10%"></div></div>
+    <button onclick="saveSt()">Save Staff Member</button> <button class="o" onclick="clrSt()">Clear</button>
+    <p style="font-size:12px;color:#777;margin-top:6px">To change someone's commission: click Edit, change it and save. To rename someone: add the new name and delete the old one. Past sales and reports keep their name.</p></div>
+   <div class="card" style="overflow-x:auto" id="stlist"></div>
+  </section>
+
+  <section class="pg" id="p-settings"><h2>Settings</h2>
+   <div class="card"><h3>Business</h3><div class="f2"><div>Phone number<input id="sphone" maxlength="25"></div><div>Address<input id="saddr" maxlength="120"></div>
+    <div>Currency label (shown before amounts)<input id="scur" maxlength="6" placeholder="e.g. Rs, AED, $"></div><div>Phone country code for WhatsApp<input id="scc" maxlength="4" placeholder="e.g. 92"></div></div>
+    <h3>Sales</h3><div class="f2"><div>Default GST / service charge %<input id="stax" type="number" min="0" max="100"></div><div>Extra payment methods (separate with commas)<input id="smeth" placeholder="Easypaisa, JazzCash"></div></div>
+    <h3>Receipts and Instagram</h3><input id="snote" maxlength="200" placeholder="Message at the bottom of every receipt (optional)"><input id="sig" placeholder="Instagram: @yoursalon or your Instagram page link">
+    <p style="font-size:12px;color:#777">Your Instagram is shown on the sign-in page, in the menu and at the bottom of WhatsApp receipts. It links to your page. It does not post to Instagram or read anything from it.</p>
+    <button onclick="saveSet()">Save Settings</button>
+    <p style="font-size:12px;color:#777;margin-top:8px">Salon name, logo and colours are under Brand &amp; Theme.</p></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -297,20 +322,23 @@ body.glass::after{width:44vw;height:44vw;right:-10vw;bottom:-14vw;background:col
 
 <script>
 const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
-const CC='92';   // country code used to fix local numbers (92 = Pakistan)
+let CC='92';   // country code used to fix local numbers; changeable in Settings
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O']]],
- ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['docs','Documents','OM'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]],
- ['Setup',[['brand','Brand & Theme','O'],['imp','Import Data','O'],['users','Users & Passwords','O'],['pw','My Password','OMS']]]];
-const ICON={sale:'🛍️',dash:'📊',clients:'👥',petty:'💵',exp:'🧾',rep:'📈',rec:'💳',appt:'📅',bridal:'👰',mem:'🎁',inv:'🧴',svc:'💇',wa:'💬',att:'🕒',docs:'📁',comm:'💰',mine:'🗓️',brand:'🎨',imp:'📥',users:'🔐',pw:'🔑'};
+ ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['docs','Documents','OM'],['staff','Staff Members','O'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]],
+ ['Setup',[['settings','Settings','O'],['brand','Brand & Theme','O'],['imp','Import Data','O'],['users','Users & Passwords','O'],['pw','My Password','OMS']]]];
+const ICON={sale:'🛍️',dash:'📊',clients:'👥',petty:'💵',exp:'🧾',rep:'📈',rec:'💳',appt:'📅',bridal:'👰',mem:'🎁',inv:'🧴',svc:'💇',wa:'💬',att:'🕒',docs:'📁',comm:'💰',mine:'🗓️',brand:'🎨',staff:'👩‍💼',settings:'⚙️',imp:'📥',users:'🔐',pw:'🔑'};
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
 let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;t.style.transform='translate(-50%,0)';clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;t.style.transform='translate(-50%,20px)'},4200)}
+window.alert=m=>toast(String(m));   // friendly pop-up messages instead of the browser's blocking box
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
-const money=n=>Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+let CUR='',SET={},lic=null;
+const money=n=>(CUR?CUR+' ':'')+Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 async function call(url,b){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});return r.json()}
-function lockout(){$('lock').style.display='block'}
+function lockout(why){const x=why==='Expired'?['Subscription Expired','Contact Administrator to Renew']:why==='Blocked'?['Account Suspended','Contact Administrator']:['Subscription Inactive','Contact Administrator'];$('lockT').textContent=x[0];$('lockS').textContent=x[1];$('lock').style.display='block'}
 let busy=0;const bar=n=>{busy+=n;$('bar').style.opacity=busy>0?1:0};
 async function api(a,d){bar(1);try{const r=await call(salonUrl,Object.assign({action:a,token},d||{}));if(r.locked){lockout();throw new Error('Account locked')}if(!r.ok)throw new Error(r.error);return r}finally{bar(-1)}}
 function waLink(phone,text){let p=String(phone).replace(/\D/g,'');if(p.startsWith('0'))p=CC+p.slice(1);else if(p.length<=10)p=CC+p;return 'https://wa.me/'+p+'?text='+encodeURIComponent(text)}
@@ -320,13 +348,13 @@ async function signIn(){
  try{
   const m=await call(MASTER_URL,{action:'resolve',salonId:$('salonId').value});
   if(m.status==='NotFound'){msg.textContent='Salon not found. Check the salon name.';return}
-  if(m.status!=='Active')return lockout();
-  salonUrl=m.salonUrl;
+  if(m.status!=='Active'&&m.status!=='Trial')return lockout(m.status);
+  salonUrl=m.salonUrl;lic={status:m.status,exp:m.expires||''};
   const r=await call(salonUrl,{action:'login',email:$('email').value,password:$('pass').value});
   if(r.locked)return lockout();
   if(!r.ok){msg.textContent=r.error;return}
   token=r.token;user=r.user;
-  sessionStorage.setItem('spos',JSON.stringify({salonUrl,token,user}));
+  sessionStorage.setItem('spos',JSON.stringify({salonUrl,token,user,lic}));
   await start();
  }catch(e){msg.textContent='Problem: '+e.message}
 }
@@ -335,7 +363,7 @@ async function start(){
   $('login').style.display='none';$('app').style.display='block';
   $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
   $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;$('af1').value=$('cf').value;$('af2').value=$('ct').value;
-  buildMenu();fetchBrand();
+  buildMenu();fetchBrand();showLic();api('getSettings').then(r=>{SET=r.settings;applySettings()}).catch(()=>{});
   if(user.role!=='Staff'){const [d]=await Promise.all([api('getData'),loadClients()]);services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text)}
   const L=user.role[0],sp=sessionStorage.getItem('spage');
   go(sp&&ITEMS[sp]&&ITEMS[sp][2].includes(L)?sp:(user.role==='Staff'?'mine':'dash'));
@@ -361,10 +389,10 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  toggleNav(false);document.querySelectorAll('.tabs a').forEach(x=>x.classList.remove('on'));if($('t-'+p))$('t-'+p).classList.add('on');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa'){showClients();showMem();showWa();loadClients()}if(p==='docs')initDocs();if(p==='dash')loadDash();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa'){showClients();showMem();showWa();loadClients()}if(p==='docs')initDocs();if(p==='dash')loadDash();if(p==='staff')loadStaff();if(p==='settings')initSettings();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
 }
 function fillLists(){
- $('services').innerHTML=services.map((s,i)=>`<div class="svc" onclick="addS(${i})">${esc(s.category)}: ${esc(s.name)} - ${esc(s.price)}</div>`).join('');
+ showSvc2();
  $('asv').innerHTML=services.map(s=>`<option>${esc(s.name)}</option>`).join('');
  $('ast').innerHTML=staff.map(s=>`<option>${esc(s.name)}</option>`).join('');
  $('psv').innerHTML=$('asv').innerHTML;$('pst').innerHTML=$('ast').innerHTML;
@@ -378,7 +406,7 @@ function draw(){
  $('cart').innerHTML=cart.map((c,i)=>{const pk=c0&&c0.pkgs.find(p=>p.service===c.name);return `<div class="line"><b>${esc(c.name)}</b> - ${c.pkgId?'package session':esc(c.price)} <a href="#" onclick="cart.splice(${i},1);draw();return false">remove</a>
   <select onchange="cart[${i}].staff=this.value"><option value="">- Specialist -</option>${staff.map(s=>`<option ${s.name===c.staff?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
   ${pk?`<label><input type="checkbox" style="width:auto" ${c.pkgId?'checked':''} onchange="cart[${i}].pkgId=this.checked?'${esc(pk.id)}':'';draw()"> Use package (${pk.left} left)</label>`:''}</div>`}).join('');
- const sub=cart.reduce((a,i)=>a+(i.pkgId?0:Number(i.price)),0),d=sub*(Number($('disc').value)||0)/100;
+ const sub=cart.reduce((a,i)=>a+(i.pkgId?0:Number(i.price)),0),dv=Number($('disc').value)||0,d=$('dtype').value==='amt'?Math.min(dv,sub):sub*dv/100;
  $('total').textContent='Total: '+money((sub-d)*(1+(Number($('tax').value)||0)/100));
 }
 function pickClient(){
@@ -392,10 +420,10 @@ async function checkout(){
  const m=$('method').value,cid=$('csel').value;
  if((m==='Wallet'||cart.some(c=>c.pkgId))&&!cid)return alert('Choose a client first');
  try{
-  const items=cart.slice(),c=curC(),r=await api('saveSale',{items,clientId:cid,discountPct:$('disc').value,taxPct:$('tax').value,method:m,cashAmt:$('cash').value});
+  const items=cart.slice(),c=curC(),r=await api('saveSale',{items,clientId:cid,discountType:$('dtype').value,discountValue:$('disc').value,taxPct:$('tax').value,method:m,cashAmt:$('cash').value});
   let h='<p class="big">Sale saved! Total: '+money(r.total)+'</p>';
   if($('cphone').value.trim()){
-   const t=fill(tpl.receipt||'Thank you {name}! Receipt {id}\n{items}\nTotal: {total} ({method})',{name:c?c.name:'valued guest',id:r.saleId,items:items.map(i=>'- '+i.name+(i.pkgId?' (package)':': '+i.price)).join('\n'),total:money(r.total),method:r.method});
+   const t=fill(tpl.receipt||'Thank you {name}! Receipt {id}\n{items}\nTotal: {total} ({method})',{name:c?c.name:'valued guest',id:r.saleId,items:items.map(i=>'- '+i.name+(i.pkgId?' (package)':': '+i.price)).join('\n'),total:money(r.total),method:r.method})+receiptTail();
    h+='<a href="'+waLink($('cphone').value,t)+'" target="_blank" rel="noopener"><button type="button">Send receipt on WhatsApp</button></a>';
   }
   $('done').innerHTML=h;cart=[];$('cphone').value='';$('cinfo').textContent='';draw();loadClients();
@@ -488,7 +516,7 @@ async function loadDash(){
    p.batches.forEach(b=>{if(b.exp&&b.exp<v.today)al.push(tg('EXPIRED','Cancelled')+' '+esc(p.name)+' batch '+esc(b.no)+' ('+b.qty+')');else if(b.exp&&b.exp<=v.soon)al.push(tg('expires soon')+' '+esc(p.name)+' batch '+esc(b.no)+' on '+esc(b.exp))})});
   clients.filter(c=>c.bday&&daysTo(c.bday.slice(-5))<=7).forEach(c=>al.push('&#127874; '+esc(c.name)+(daysTo(c.bday.slice(-5))?' birthday in '+daysTo(c.bday.slice(-5))+' days':' birthday TODAY')));
   if(user.role==='Owner'&&r.pending)al.push(tg('approve')+' '+r.pending+' expense(s) waiting');
-  $('dalert').innerHTML=al.map(x=>`<div class="line">${x}</div>`).join('')||'<p>All clear.</p>';
+  $('dalert').innerHTML=al.map(x=>`<div class="line">${x}</div>`).join('')||'<p>All clear.</p>';showGS();
  }catch(e){alert(e.message)}
 }
 async function refreshData(){try{const d=await api('getData');services=d.services;staff=d.staff;fillLists();showSvc()}catch(e){alert(e.message)}}
@@ -544,24 +572,24 @@ async function saveU(){try{await api('saveUser',{email:$('ue').value,name:$('un'
 async function delU(i){if(!confirm('Delete the login for '+usersL[i].name+'?'))return;try{await api('deleteUser',{email:usersL[i].email});loadUsers()}catch(e){alert(e.message)}}
 async function changePw(){
  if($('pw1').value!==$('pw2').value)return alert('The two new passwords are not the same');
- try{await api('changePassword',{oldPassword:$('pw0').value,newPassword:$('pw1').value});alert('Password changed. Please sign in again with the new password.');signOut()}catch(e){alert(e.message)}
+ try{await api('changePassword',{oldPassword:$('pw0').value,newPassword:$('pw1').value});alert('Password changed. Please sign in again with the new password.');setTimeout(signOut,1800)}catch(e){alert(e.message)}
 }
 const FONTS={elegant:"'Cormorant Garamond',serif",classic:"'Playfair Display',serif",modern:"'DM Sans',sans-serif"};
-let brand={name:'SALON POS',tagline:'',dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8',font:'elegant',logo:'',style:'solid'};
+let brand={name:'SALON POS',tagline:'',dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8',font:'elegant',logo:'',style:'solid',instagram:''};
 function applyBrand(b,pwa){
  brand=Object.assign({},brand,b||{});
  if(brand.logo&&!/^data:image\/(png|jpeg|webp);base64,/.test(brand.logo))brand.logo='';
  const r=document.documentElement.style;r.setProperty('--dk',brand.dk);r.setProperty('--gold',brand.gold);r.setProperty('--bg',brand.bg);r.setProperty('--hf',FONTS[brand.font]||FONTS.elegant);
  $('sname').textContent=$('lname').textContent=brand.name||'SALON POS';$('ltag').textContent=brand.tagline||'SIGN IN';
  ['slogo','llogo'].forEach(id=>{const i=$(id);i.style.display=brand.logo?'block':'none';if(brand.logo)i.src=brand.logo});
- document.title=brand.name||'Salon POS';$('mname').textContent=brand.name||'SALON POS';document.body.classList.toggle('glass',brand.style==='glass');
+ document.title=brand.name||'Salon POS';{const lk=$('linsta');if(brand.instagram){lk.href='https://instagram.com/'+encodeURIComponent(brand.instagram);lk.textContent='Follow @'+brand.instagram+' on Instagram';lk.style.display='inline-block'}else lk.style.display='none'}$('mname').textContent=brand.name||'SALON POS';document.body.classList.toggle('glass',brand.style==='glass');
  if(pwa)setupPwa();
 }
 function cacheBrand(b){try{const id=$('salonId').value.trim()||localStorage.getItem('lastSalon');if(id){localStorage.setItem('lastSalon',id);localStorage.setItem('brand_'+id,JSON.stringify(b))}}catch(e){}}
 function fetchBrand(){call(salonUrl,{action:'brand'}).then(b=>{if(b.ok){applyBrand(b.brand,true);cacheBrand(b.brand)}}).catch(()=>{})}
 async function loadBrandFor(id){
  id=id.trim();if(!id)return;
- try{const m=await call(MASTER_URL,{action:'resolve',salonId:id});if(m.status!=='Active'||!m.salonUrl)return;
+ try{const m=await call(MASTER_URL,{action:'resolve',salonId:id});if((m.status!=='Active'&&m.status!=='Trial')||!m.salonUrl)return;
   const b=await call(m.salonUrl,{action:'brand'});if(b.ok){applyBrand(b.brand);try{localStorage.setItem('brand_'+id,JSON.stringify(b.brand))}catch(e){}}}catch(e){}
 }
 const PRESETS={'Classic Gold':{dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8'},'Rose Blush':{dk:'#4A1D33',gold:'#E8A0B4',bg:'#FBF0F3'},'Emerald Spa':{dk:'#0F3D33',gold:'#D4B26A',bg:'#EEF5F1'},'Midnight Luxe':{dk:'#1B1B2F',gold:'#C8A2E8',bg:'#F1F0F7'},'Ocean Breeze':{dk:'#12324A',gold:'#7FC8D6',bg:'#EDF4F7'}};
@@ -697,6 +725,44 @@ async function openDoc(id,dl){
  }catch(e){if(w)w.close();alert(e.message)}
 }
 async function delDoc(id){if(!confirm('Delete this document? It is moved to the Drive bin.'))return;try{await api('docDelete',{id});loadDocs()}catch(e){alert(e.message)}}
+let catsL=[''],svCat='';
+function showSvc2(){
+ const q=($('svq').value||'').toLowerCase();catsL=['',...new Set(services.map(s=>s.category))];
+ $('svcats').innerHTML=catsL.length>2?catsL.map((c,i)=>`<button type="button" class="sm ${svCat===c?'':'o'}" onclick="svCat=catsL[${i}];showSvc2()">${c?esc(c):'All'}</button>`).join(''):'';
+ $('services').innerHTML=services.map((s,i)=>({s,i})).filter(x=>(!svCat||x.s.category===svCat)&&(x.s.name+' '+x.s.category).toLowerCase().includes(q)).map(x=>`<div class="svc" onclick="addS(${x.i})"><b>${esc(x.s.name)}</b><br><small>${esc(x.s.category)} &middot; ${money(x.s.price)}</small></div>`).join('')||'<p>No services match.</p>';
+}
+const receiptTail=()=>(SET.receiptNote?'\n'+SET.receiptNote:'')+(SET.phone?'\nCall us: '+SET.phone:'')+(SET.instagram?'\nFollow us on Instagram: @'+SET.instagram:'');
+function fillPay(){
+ const m=['Cash','Card','Bank Transfer'].concat((SET.methods||'').split(',').map(x=>x.trim()).filter(Boolean)),o=m.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+ ['wmeth','pmeth','bmeth','rmeth'].forEach(i=>{const v=$(i).value;$(i).innerHTML=o;if(m.includes(v))$(i).value=v});
+ const cur=$('method').value;$('method').innerHTML=o+'<option value="Split">Split (Cash + Card)</option><option value="Wallet">Client Wallet</option>';if(cur)$('method').value=cur;
+}
+function applySettings(){
+ CUR=SET.currency||'';CC=SET.cc||'92';if(SET.taxPct&&!$('tax').value)$('tax').value=SET.taxPct;fillPay();
+ const a=$('insta');if(SET.instagram){a.href='https://instagram.com/'+encodeURIComponent(SET.instagram);a.textContent='Instagram @'+SET.instagram;a.style.display='inline-block'}else a.style.display='none';
+ showSvc2();draw();
+}
+function showLic(){
+ const b=$('licb');b.style.display='none';if(!lic||!lic.exp)return;const days=Math.ceil((new Date(lic.exp+'T23:59:59')-new Date())/864e5);
+ if(lic.status==='Trial'){b.textContent='Free trial: '+Math.max(days,0)+' day(s) left (ends '+lic.exp+'). Contact the administrator to subscribe.';b.style.display='block'}
+ else if(days<=7){b.textContent='Your subscription ends in '+Math.max(days,0)+' day(s) ('+lic.exp+'). Contact the administrator to renew.';b.style.display='block'}
+}
+function showGS(){
+ const g=$('gstart');if(user.role!=='Owner'){g.style.display='none';return}
+ const it=[['Add your real services',services.some(s=>!['Haircut','Facial','HydraFacial'].includes(s.name)),'svc'],['Add your staff members',staff.some(s=>!['Ayesha','Sara'].includes(s.name)),'staff'],['Upload your logo',!!brand.logo,'brand'],['Add your Instagram',!!SET.instagram,'settings'],['Add your first client',clients.length>0,'clients']];
+ if(it.every(x=>x[1])){g.style.display='none';return}
+ g.style.display='block';g.innerHTML='<h3>Getting started</h3>'+it.map(x=>`<div class="line">${x[1]?'\u2705 <s>'+x[0]+'</s>':'\u2B1C <a href="#" onclick="go(\''+x[2]+'\');return false">'+x[0]+'</a>'}</div>`).join('');
+}
+let stL=[];
+async function loadStaff(){try{stL=(await api('staffList')).staff;$('stlist').innerHTML='<table><tr><th>Name</th><th>Commission</th><th></th></tr>'+stL.map((s,i)=>`<tr><td><b>${esc(s.name)}</b></td><td>${s.type==='fixed'?money(s.value)+' per service':s.value+'%'}</td><td><button class="sm o" onclick="editSt(${i})">Edit</button><button class="sm o" onclick="giveLogin(${i})">Give login</button><button class="sm o" onclick="delSt(${i})">Delete</button></td></tr>`).join('')+'</table>'}catch(e){alert(e.message)}}
+function editSt(i){const s=stL[i];$('stn').value=s.name;$('stt').value=s.type;$('stv').value=s.value;scrollTo(0,0)}
+function clrSt(){$('stn').value='';$('stv').value='';$('stt').value='percent'}
+async function refreshStaffLists(){try{const d=await api('getData');staff=d.staff;fillLists()}catch(e){}}
+async function saveSt(){try{await api('saveStaff',{name:$('stn').value,type:$('stt').value,value:$('stv').value});clrSt();alert('Staff member saved');await loadStaff();refreshStaffLists()}catch(e){alert(e.message)}}
+async function delSt(i){if(!confirm('Delete '+stL[i].name+'? Past sales and reports keep their name. If they have a login, delete it too under Users & Passwords.'))return;try{await api('deleteStaff',{name:stL[i].name});await loadStaff();refreshStaffLists()}catch(e){alert(e.message)}}
+function giveLogin(i){go('users');$('un').value=stL[i].name;$('ur').value='Staff';$('ue').focus()}
+function initSettings(){$('sphone').value=SET.phone||'';$('saddr').value=SET.address||'';$('scur').value=SET.currency||'';$('scc').value=SET.cc||'';$('stax').value=SET.taxPct||'';$('smeth').value=SET.methods||'';$('snote').value=SET.receiptNote||'';$('sig').value=SET.instagram?'@'+SET.instagram:''}
+async function saveSet(){try{await api('saveSettings',{phone:$('sphone').value,address:$('saddr').value,currency:$('scur').value,cc:$('scc').value,taxPct:$('stax').value,methods:$('smeth').value,receiptNote:$('snote').value,instagram:$('sig').value});SET=(await api('getSettings')).settings;$('tax').value=SET.taxPct||'';applySettings();fetchBrand();initSettings();alert('Settings saved')}catch(e){alert(e.message)}}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
@@ -729,7 +795,7 @@ async function loadLines(){
 (function(){try{const q=new URLSearchParams(location.search).get('salon'),id=q||localStorage.getItem('lastSalon');if(id){$('salonId').value=id;const b=JSON.parse(localStorage.getItem('brand_'+id)||'null');if(b)applyBrand(b,true);else if(q)loadBrandFor(q)}}catch(e){}})();
 $('salonId').addEventListener('change',()=>loadBrandFor($('salonId').value));
 function toggleNav(o){$('sb').classList.toggle('open',o);$('ov').style.display=o?'block':'none'}
-function countUp(){document.querySelectorAll('#dstats .st b').forEach(b=>{const end=b.textContent,n=Number(end.replace(/,/g,''));if(!(n>0)||n>1e9)return;const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/700),e=1-Math.pow(1-k,3);b.textContent=k<1?money(Math.round(n*e)):end;if(k<1)requestAnimationFrame(f)})(t0)})}
+function countUp(){document.querySelectorAll('#dstats .st b').forEach(b=>{const end=b.textContent,mm=end.match(/^(\D*?)([\d,]+(?:\.\d+)?)$/);if(!mm)return;const n=Number(mm[2].replace(/,/g,''));if(!(n>0)||n>1e9)return;const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/700),e=1-Math.pow(1-k,3);b.textContent=k<1?money(Math.round(n*e)):end;if(k<1)requestAnimationFrame(f)})(t0)})}
 let dip=null,pwaT;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;['inst','inst2'].forEach(i=>$(i).style.display='inline-block')});
 addEventListener('appinstalled',()=>{['inst','inst2'].forEach(i=>$(i).style.display='none')});
@@ -766,5 +832,5 @@ async function makeAppFiles(){
 }
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 // restore the login after a page refresh (runs last, once everything above is defined)
-(function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){salonUrl=sv.salonUrl;token=sv.token;user=sv.user;start()}}catch(e){}})();
+(function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){salonUrl=sv.salonUrl;token=sv.token;user=sv.user;lic=sv.lic||null;start()}}catch(e){}})();
 </script></body></html>
