@@ -145,11 +145,12 @@ button{position:relative;overflow:hidden}
 
 <div id="login"><div class="card">
  <img id="llogo" alt="" style="display:none"><div class="logo" id="lname">SALON POS</div><p id="ltag">SIGN IN</p>
- <input id="salonId" placeholder="Salon name" autocapitalize="none" autocomplete="organization">
- <input id="email" placeholder="Email">
- <input id="pass" type="password" placeholder="Password">
+ <input id="salonId" placeholder="Business ID (for example INA-351)" autocapitalize="characters" autocomplete="organization" spellcheck="false">
+ <input id="email" placeholder="Username or email" autocapitalize="none" autocomplete="username" spellcheck="false">
+ <input id="pass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')signIn()">
  <button onclick="signIn()" style="width:100%">Sign In</button>
  <p id="msg" class="err"></p>
+ <p style="margin-top:10px;font-size:12px"><a href="admin.html">Platform administrator? Sign in here</a></p>
  <button type="button" class="o inst" id="inst2" onclick="installApp()" style="margin-top:6px">Install this app</button><p id="ioshint" style="display:none;font-size:12px;color:var(--tx2);margin-top:8px">To install on iPhone or iPad: tap the Share button, then Add to Home Screen.</p>
  <a id="linsta" target="_blank" rel="noopener" style="display:none;margin-top:10px;font-size:13px"></a>
 </div></div>
@@ -256,7 +257,7 @@ button{position:relative;overflow:hidden}
   </section>
 
   <section class="pg" id="p-users"><h2>Users &amp; Passwords</h2>
-   <div class="card"><div class="f2"><div>Email (their login)<input id="ue" type="email"></div><div>Name<input id="un" placeholder="Staff logins must match a name in the Staff tab"></div>
+   <div class="card"><div class="f2"><div>Username or email (their login)<input id="ue" autocapitalize="none" autocomplete="off"></div><div>Name<input id="un" placeholder="Staff logins must match a name in the Staff tab"></div>
     <div>Role<select id="ur"><option>Manager</option><option>Staff</option><option>Owner</option></select></div><div>Password<input id="up" type="password" placeholder="At least 8 characters"></div></div>
     <button onclick="saveU()">Save User</button> <button class="o" onclick="clrU()">Clear</button>
     <p style="font-size:12px;color:var(--tx2);margin-top:6px">To change someone's password or role: click Edit, type a new password (leave it empty to keep the old one), and save. They are signed out and must sign in again.</p></div>
@@ -319,6 +320,12 @@ button{position:relative;overflow:hidden}
     <p style="font-size:12px;color:var(--tx2);margin-top:8px">Salon name, logo and colours are under Brand &amp; Theme.</p></div>
   </section>
 
+  <section class="pg" id="p-log"><h2>Activity Log</h2>
+   <div class="card" style="overflow-x:auto"><div class="f2"><select id="lgev" onchange="loadLog()"><option value="">All events</option><option value="Login">Sign-ins</option><option value="Logout">Sign-outs</option><option value="Failed">Failed sign-ins</option></select><div><button onclick="loadLog()" style="margin-top:4px">Refresh</button></div></div>
+    <div id="lglist"></div>
+    <p style="font-size:12px;color:var(--tx2);margin-top:8px">Shows the newest 300 events. If someone closes the browser without pressing Sign out, no sign-out is recorded: that session simply ends after 6 hours.</p></div>
+  </section>
+
   <section class="pg" id="p-inv"><h2>Inventory</h2>
    <div class="card"><h3>Stock</h3><div id="invlist" style="overflow-x:auto"></div></div>
    <div class="card"><h3>Receive stock (new batch)</h3><div class="f2"><select id="rp"></select><input id="rb" placeholder="Batch number"><div>Expiry date<input id="re" type="date"></div><input id="rq" type="number" placeholder="Quantity"></div><button onclick="recv()">Add Batch</button>
@@ -348,15 +355,15 @@ button{position:relative;overflow:hidden}
 </div>
 
 <script>
-const MASTER_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
+const API_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';   // the ONE address of your platform script
 let CC='92';   // country code used to fix local numbers; changeable in Settings
 const MENU=[['Daily',[['sale','New Sale','OM'],['dash','Dashboard','OM'],['clients','Clients','OM',3]]],
  ['Finance',[['petty','Daily Petty Cash','OM'],['exp','Expenses','OM'],['rep','Reports & Profit','O'],['rec','Recovery','O']]],
  ['Business',[['appt','Appointments','OM'],['bridal','Bridal','OM'],['mem','Memberships & Wallets','OM',3],['inv','Inventory','OM'],['svc','Services Menu','O'],['wa','WhatsApp & Birthdays','OM'],['att','Attendance','OM'],['docs','Documents','OM'],['staff','Staff Members','O'],['comm','Staff & Commissions','O'],['mine','My Schedule & Stats','S']]],
- ['Setup',[['settings','Settings','O'],['brand','Brand & Theme','O'],['imp','Import Data','O'],['users','Users & Passwords','O'],['pw','My Password','OMS']]]];
-const ICON={sale:'🛍️',dash:'📊',clients:'👥',petty:'💵',exp:'🧾',rep:'📈',rec:'💳',appt:'📅',bridal:'👰',mem:'🎁',inv:'🧴',svc:'💇',wa:'💬',att:'🕒',docs:'📁',comm:'💰',mine:'🗓️',brand:'🎨',staff:'👩‍💼',settings:'⚙️',imp:'📥',users:'🔐',pw:'🔑'};
+ ['Setup',[['settings','Settings','O'],['log','Activity Log','O'],['brand','Brand & Theme','O'],['imp','Import Data','O'],['users','Users & Passwords','O'],['pw','My Password','OMS']]]];
+const ICON={sale:'🛍️',dash:'📊',clients:'👥',petty:'💵',exp:'🧾',rep:'📈',rec:'💳',appt:'📅',bridal:'👰',mem:'🎁',inv:'🧴',svc:'💇',wa:'💬',att:'🕒',docs:'📁',comm:'💰',mine:'🗓️',brand:'🎨',log:'📜',staff:'👩‍💼',settings:'⚙️',imp:'📥',users:'🔐',pw:'🔑'};
 const ITEMS={};MENU.forEach(g=>g[1].forEach(i=>ITEMS[i[0]]=i));
-let salonUrl='',token='',user=null,services=[],staff=[],cart=[],appts=[];
+let salonUrl=API_URL,biz=null,token='',user=null,services=[],staff=[],cart=[],appts=[];
 const $=id=>document.getElementById(id);
 function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;t.style.transform='translate(-50%,0)';clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;t.style.transform='translate(-50%,20px)'},4200)}
 window.alert=m=>toast(String(m));
@@ -369,28 +376,26 @@ const money=n=>(CUR?CUR+' ':'')+Number(n).toLocaleString(undefined,{maximumFract
 async function call(url,b){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});return r.json()}
 function lockout(why){const x=why==='Expired'?['Subscription Expired','Contact Administrator to Renew']:why==='Blocked'?['Account Suspended','Contact Administrator']:['Subscription Inactive','Contact Administrator'];$('lockT').textContent=x[0];$('lockS').textContent=x[1];$('lock').style.display='block'}
 let busy=0;const bar=n=>{busy+=n;$('bar').style.opacity=busy>0?1:0};
-async function api(a,d){bar(1);try{const r=await call(salonUrl,Object.assign({action:a,token},d||{}));if(r.locked){lockout();throw new Error('Account locked')}if(!r.ok)throw new Error(r.error);return r}finally{bar(-1)}}
+async function api(a,d){bar(1);try{const r=await call(salonUrl,Object.assign({action:a,token},d||{}));if(r.locked){lockout(r.why);throw new Error('Account locked')}if(!r.ok)throw new Error(r.error);return r}finally{bar(-1)}}
 function waLink(phone,text){let p=String(phone).replace(/\D/g,'');if(p.startsWith('0'))p=CC+p.slice(1);else if(p.length<=10)p=CC+p;return 'https://wa.me/'+p+'?text='+encodeURIComponent(text)}
 
+function devInfo(){const u=navigator.userAgent,os=/Android/.test(u)?'Android':/iPhone|iPad/.test(u)?'iOS':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':/Linux/.test(u)?'Linux':'Other',br=/Edg\//.test(u)?'Edge':/OPR\//.test(u)?'Opera':/Chrome\//.test(u)?'Chrome':/Firefox\//.test(u)?'Firefox':/Safari\//.test(u)?'Safari':'Browser';return br+' on '+os+((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)?' (app)':'')}
 async function signIn(){
  const msg=$('msg');msg.textContent='Checking...';
  try{
-  const m=await call(MASTER_URL,{action:'resolve',salonId:$('salonId').value});
-  if(m.status==='NotFound'){msg.textContent='Salon not found. Check the salon name.';return}
-  if(m.status!=='Active'&&m.status!=='Trial')return lockout(m.status);
-  salonUrl=m.salonUrl;lic={status:m.status,exp:m.expires||''};
-  const r=await call(salonUrl,{action:'login',email:$('email').value,password:$('pass').value});
-  if(r.locked)return lockout();
-  if(!r.ok){msg.textContent=r.error;return}
-  token=r.token;user=r.user;
-  sessionStorage.setItem('spos',JSON.stringify({salonUrl,token,user,lic}));
+  const r=await call(API_URL,{action:'login',businessId:$('salonId').value,email:$('email').value,password:$('pass').value,device:devInfo()});
+  if(r.locked)return lockout(r.why);
+  if(!r.ok){msg.textContent=r.error||'Could not sign in';return}
+  token=r.token;user=r.user;biz=r.business;lic={status:r.business.status,exp:r.business.expires||''};
+  sessionStorage.setItem('spos',JSON.stringify({token,user,lic,biz}));
+  try{localStorage.setItem('lastSalon',$('salonId').value.trim())}catch(e){}
   await start();
  }catch(e){msg.textContent='Problem: '+e.message}
 }
 async function start(){
  try{
   $('login').style.display='none';$('app').style.display='block';
-  $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role;
+  $('who').textContent=user.name;$('role').textContent='Signed in as '+user.role+(biz?' · '+biz.id:'');
   $('cf').value=today().slice(0,8)+'01';$('ct').value=today();$('ad').value=today();$('rf').value=$('cf').value;$('rt').value=$('ct').value;$('af1').value=$('cf').value;$('af2').value=$('ct').value;
   buildMenu();fetchBrand();showLic();api('getSettings').then(r=>{SET=r.settings;applySettings()}).catch(()=>{});
   if(user.role!=='Staff'){const [d]=await Promise.all([api('getData'),loadClients()]);services=d.services;staff=d.staff;fillLists();d.templates.forEach(t=>tpl[t.key]=t.text)}
@@ -401,7 +406,7 @@ async function start(){
   $('login').style.display='flex';$('app').style.display='none';$('msg').textContent='Problem: '+e.message;
  }
 }
-function signOut(){sessionStorage.removeItem('spos');sessionStorage.removeItem('spage');location.reload()}
+function signOut(){try{fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'logout',token,device:devInfo()}),keepalive:true}).catch(()=>{})}catch(e){}sessionStorage.removeItem('spos');sessionStorage.removeItem('spage');setTimeout(()=>location.reload(),250)}   // the sign-out is recorded in the activity log
 function buildMenu(){
  const L=user.role[0];let h='';
  MENU.forEach(g=>{const v=g[1].filter(i=>i[2].includes(L));if(v.length)h+='<div class="nl">'+g[0]+'</div>'+v.map(i=>`<div class="ni" id="n-${i[0]}" onclick="go('${i[0]}')">${ICON[i[0]]||''} ${i[1]}</div>`).join('')});
@@ -418,7 +423,7 @@ function go(p){
  if(!sec){$('soonT').textContent=ITEMS[p][1];$('soonP').textContent=ITEMS[p][3]==5?'Planned for a later phase.':'Coming in Phase '+ITEMS[p][3]+'.'}
  if($('n-'+p))$('n-'+p).classList.add('on');
  toggleNav(false);document.querySelectorAll('.tabs a').forEach(x=>x.classList.remove('on'));if($('t-'+p))$('t-'+p).classList.add('on');
- if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa'){showClients();showMem();showWa();loadClients()}if(p==='docs')initDocs();if(p==='dash')loadDash();if(p==='staff')loadStaff();if(p==='settings')initSettings();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
+ if(p==='appt')loadAppts();if(p==='comm'||p==='mine')loadLines();if(p==='clients'||p==='mem'||p==='wa'){showClients();showMem();showWa();loadClients()}if(p==='docs')initDocs();if(p==='dash')loadDash();if(p==='log')loadLog();if(p==='staff')loadStaff();if(p==='settings')initSettings();if(p==='users')loadUsers();if(p==='rec')loadRec();if(p==='bridal')loadBridal();if(p==='att')loadAtt();if(p==='svc')refreshData();if(p==='inv')loadInv();if(p==='exp')loadExp();if(p==='petty')loadPetty();if(p==='rep')loadRep();if(p==='brand')initBrandForm();if(p==='imp')impHint();
 }
 function fillLists(){
  showSvc2();
@@ -619,11 +624,10 @@ function applyBrand(b,pwa){
  if(pwa)setupPwa();
 }
 function cacheBrand(b){try{const id=$('salonId').value.trim()||localStorage.getItem('lastSalon');if(id){localStorage.setItem('lastSalon',id);localStorage.setItem('brand_'+id,JSON.stringify(b))}}catch(e){}}
-function fetchBrand(){call(salonUrl,{action:'brand'}).then(b=>{if(b.ok){applyBrand(b.brand,true);cacheBrand(b.brand)}}).catch(()=>{})}
+function fetchBrand(){call(API_URL,{action:'brand',token}).then(b=>{if(b.ok){applyBrand(b.brand,true);cacheBrand(b.brand)}}).catch(()=>{})}
 async function loadBrandFor(id){
  id=id.trim();if(!id)return;
- try{const m=await call(MASTER_URL,{action:'resolve',salonId:id});if((m.status!=='Active'&&m.status!=='Trial')||!m.salonUrl)return;
-  const b=await call(m.salonUrl,{action:'brand'});if(b.ok){applyBrand(b.brand);try{localStorage.setItem('brand_'+id,JSON.stringify(b.brand))}catch(e){}}}catch(e){}
+ try{const b=await call(API_URL,{action:'brand',businessId:id});if(b.ok){applyBrand(b.brand);try{localStorage.setItem('brand_'+id,JSON.stringify(b.brand))}catch(e){}}}catch(e){}
 }
 const PRESETS={'Classic Gold':{dk:'#2C1810',gold:'#C9A96E',bg:'#F4EFE8'},'Rose Blush':{dk:'#4A1D33',gold:'#E8A0B4',bg:'#FBF0F3'},'Emerald Spa':{dk:'#0F3D33',gold:'#D4B26A',bg:'#EEF5F1'},'Midnight Luxe':{dk:'#1B1B2F',gold:'#C8A2E8',bg:'#F1F0F7'},'Ocean Breeze':{dk:'#12324A',gold:'#7FC8D6',bg:'#EDF4F7'}};
 let bLogo;
@@ -799,6 +803,11 @@ async function delSt(i){if(!confirm('Delete '+stL[i].name+'? Past sales and repo
 function giveLogin(i){go('users');$('un').value=stL[i].name;$('ur').value='Staff';$('ue').focus()}
 function initSettings(){$('sphone').value=SET.phone||'';$('saddr').value=SET.address||'';$('scur').value=SET.currency||'';$('scc').value=SET.cc||'';$('stax').value=SET.taxPct||'';$('smeth').value=SET.methods||'';$('snote').value=SET.receiptNote||'';$('sig').value=SET.instagram?'@'+SET.instagram:''}
 async function saveSet(){try{await api('saveSettings',{phone:$('sphone').value,address:$('saddr').value,currency:$('scur').value,cc:$('scc').value,taxPct:$('stax').value,methods:$('smeth').value,receiptNote:$('snote').value,instagram:$('sig').value});SET=(await api('getSettings')).settings;$('tax').value=SET.taxPct||'';applySettings();fetchBrand();initSettings();alert('Settings saved')}catch(e){alert(e.message)}}
+async function loadLog(){
+ try{const r=await api('logList',{event:$('lgev').value});
+  $('lglist').innerHTML=r.logs.length?'<table><tr><th>When</th><th>User</th><th>Role</th><th>Event</th><th>Device</th></tr>'+r.logs.map(x=>`<tr><td>${esc(x.time)}</td><td>${esc(x.user)}</td><td>${esc(x.role)}</td><td>${tg(esc(x.event),/Failed|Blocked/.test(x.event)?'Cancelled':/Login/.test(x.event)?'Confirmed':'')}</td><td>${esc(x.device)}</td></tr>`).join('')+'</table>':'<p>No activity yet.</p>';
+ }catch(e){alert(e.message)}
+}
 async function loadAppts(){try{appts=(await api('getAppts')).appts.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));showAppts()}catch(e){$('alist').textContent=e.message}}
 function showAppts(){
  $('alist').innerHTML='<table><tr><th>When</th><th>Client</th><th>Service / Specialist</th><th>Status</th><th></th></tr>'+appts.map((a,i)=>`<tr><td>${esc(a.date)}<br>${esc(a.time)} (${a.min}m)</td><td>${esc(a.client)}</td><td>${esc(a.service)}<br>${esc(a.staff)}</td><td><span class="tag ${esc(a.status)}">${esc(a.status)}</span></td>
@@ -887,5 +896,5 @@ document.querySelectorAll('input:not([type]),input[type=text],input[type=search]
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;const r=b.getBoundingClientRect(),s=document.createElement('span'),d=Math.max(r.width,r.height)/3;s.className='rip';s.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';b.appendChild(s);setTimeout(()=>s.remove(),600)});
 $('mlang').textContent=micLang==='ur-PK'?'\u0627\u0631\u062F\u0648':'EN';
 // restore the login after a page refresh (runs last, once everything above is defined)
-(function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){salonUrl=sv.salonUrl;token=sv.token;user=sv.user;lic=sv.lic||null;start()}}catch(e){}})();
+(function(){try{const sv=JSON.parse(sessionStorage.getItem('spos')||'null');if(sv&&sv.token){token=sv.token;user=sv.user;lic=sv.lic||null;biz=sv.biz||null;start()}}catch(e){}})();
 </script></body></html>
