@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Platform admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A96E;--gold2:#a98b4f;--bg:#F4F1EC;--ink:#2a2018;--mut:#8b7f72;--card:#fff;--line:#e8e0d4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:radial-gradient(900px 500px at 100% -5%,#c9a96e26,transparent),var(--bg);min-height:100vh}
+input,select,button{font:inherit;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%;margin:4px 0}
+input:focus,select:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px #c9a96e33}
+button{width:auto;cursor:pointer;font-weight:700;transition:transform .15s,box-shadow .15s}
+button:hover{transform:translateY(-1px)}
+.btn{background:linear-gradient(135deg,#d4b676,#a98b4f);color:#1c1308;border:0;padding:11px 18px;box-shadow:0 6px 16px #a98b4f55}
+.sm{padding:6px 11px;font-size:12px;margin:2px;border-radius:10px;background:#fff;color:var(--ink);font-weight:500}
+.sm.red{border-color:#e53935;color:#c62828;background:#fff5f5}.sm.blue{border-color:#3b82f6;color:#1d4ed8;background:#f3f8ff}.sm.green{border-color:#2e9e5b;color:#1b7a43;background:#f2fbf6}
+h1,h2{font-family:'Cormorant Garamond',serif;font-weight:600}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px;width:100%;max-width:420px;box-shadow:0 20px 60px #2a201822;text-align:center}
+.logo{width:64px;height:64px;border-radius:18px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:30px;background:linear-gradient(135deg,#d4b676,#7a6230)}
+.box h1{color:var(--gold);font-size:30px}.box small{letter-spacing:2px;color:var(--mut);font-size:11px}
+.box label{display:block;text-align:left;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mut);margin-top:12px;text-transform:uppercase}
+#app{display:none}
+.top{display:flex;align-items:center;gap:14px;padding:12px 22px;background:#fffdf9;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}.brand .logo{width:40px;height:40px;font-size:20px;margin:0;border-radius:12px}
+.brand b{display:block;font-size:14px}.brand span{font-size:10px;letter-spacing:2px;color:var(--gold2)}
+.tabs button{background:transparent;border:0;color:var(--mut);padding:9px 14px;margin:0;border-radius:10px}.tabs button.on{background:#c9a96e26;color:var(--gold2)}
+.wrap{max-width:1180px;margin:0 auto;padding:22px}
+.head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.head h2{font-size:30px;margin-right:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px}
+.st{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:16px;padding:14px 18px;box-shadow:0 6px 20px #2a20180d}
+.st small{font-size:11px;letter-spacing:1px;color:var(--mut);font-weight:700;text-transform:uppercase}.st b{display:block;font-size:30px;font-family:'Cormorant Garamond',serif;margin-top:4px}
+.st.g{border-left-color:#2e9e5b}.st.o{border-left-color:#d97706}.st.r{border-left-color:#e53935}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 20px #2a20180d;overflow-x:auto}
+table{width:100%;border-collapse:collapse}th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut);text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}
+td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}tr:last-child td{border-bottom:0}
+.id{font-family:ui-monospace,Menlo,monospace;color:var(--gold2);font-weight:700}.mut{color:var(--mut);font-size:12px}
+.pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid}
+.pill.Active{color:#1b7a43;border-color:#2e9e5b;background:#f2fbf6}.pill.Trial{color:#b45309;border-color:#d97706;background:#fff8ed}.pill.Blocked,.pill.Expired{color:#c62828;border-color:#e53935;background:#fff5f5}
+.act{white-space:nowrap}
+.modal{position:fixed;inset:0;background:#1c130a99;display:none;align-items:center;justify-content:center;padding:16px;z-index:60;backdrop-filter:blur(3px)}
+.modal .in{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:92vh;overflow:auto;box-shadow:0 30px 80px #0006}
+.modal h2{font-size:26px;margin-bottom:6px}.modal label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--mut);display:block;margin-top:10px;text-transform:uppercase}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.res{background:#f9f6ef;border:1px dashed var(--gold);border-radius:14px;padding:14px;margin-top:12px;line-height:1.9}
+.res code{background:#fff;border:1px solid var(--line);border-radius:8px;padding:2px 8px;font-family:ui-monospace,Menlo,monospace;font-weight:700}
+#bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:99;opacity:0;transition:opacity .2s;background:linear-gradient(90deg,transparent,var(--gold),transparent);background-size:50% 100%;background-repeat:no-repeat;animation:sl 1s linear infinite}@keyframes sl{from{background-position:-50% 0}to{background-position:150% 0}}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#2a2018;color:#fff;padding:12px 18px;border-radius:14px;opacity:0;transition:all .25s;z-index:100;max-width:90vw;pointer-events:none}
+.err{color:#c62828;margin:8px 0;min-height:18px}
+@media(max-width:700px){.wrap{padding:12px}.top{padding:10px 12px}}
+</style></head><body>
+<div id="bar"></div><div id="toast"></div>
+
+<div id="login"><div class="box">
+ <div class="logo">&#127970;</div><h1>Business Portal</h1><small>PLATFORM ADMINISTRATOR</small>
+ <label>Admin username</label><input id="u" autocomplete="username" autocapitalize="none">
+ <label>Password</label><input id="p" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+ <button class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Sign in &rarr;</button>
+ <p class="err" id="lerr"></p>
+ <a href="index.html" style="font-size:12px;color:var(--mut)">&larr; Back to business sign-in</a>
+</div></div>
+
+<div id="app">
+ <div class="top"><div class="brand"><div class="logo">&#127970;</div><div><b>Business Portal</b><span>SUPER ADMIN</span></div></div>
+  <div class="tabs"><button id="t-b" class="on" onclick="tab('b')">Businesses</button><button id="t-l" onclick="tab('l')">Activity logs</button><button id="t-s" onclick="tab('s')">Settings</button></div>
+  <button class="sm" onclick="signOut()">Sign out</button></div>
+ <div class="wrap">
+  <section id="v-b">
+   <div class="head"><h2>Businesses (tenants)</h2><button class="btn" onclick="openOnboard()">+ Onboard new business</button></div>
+   <div class="stats" id="stats"></div>
+   <div class="card"><table><thead><tr><th>Business ID</th><th>Business</th><th>Owner</th><th>Status</th><th>Expires</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div>
+  </section>
+  <section id="v-l" style="display:none">
+   <div class="head"><h2>Activity logs</h2></div>
+   <div class="card" style="padding:16px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px"><div><label class="mut">Business</label><select id="lb" onchange="loadLogs()"></select></div><div><label class="mut">Event</label><select id="le" onchange="loadLogs()"><option value="">All events</option><option value="Login">Sign-ins</option><option value="Logout">Sign-outs</option><option value="Failed">Failed sign-ins</option><option value="Blocked">Blocked sign-ins</option><option value="Admin">Admin sign-ins</option></select></div></div>
+    <div class="row"><button class="sm" onclick="loadLogs()">Refresh</button><button class="sm red" onclick="purge()">Delete logs older than 90 days</button></div>
+    <div style="overflow-x:auto;margin-top:10px"><table><thead><tr><th>When</th><th>Business</th><th>User</th><th>Role</th><th>Event</th><th>Device</th></tr></thead><tbody id="lrows"></tbody></table></div>
+    <p class="mut" style="margin-top:8px">Shows the newest 200 events. Closing a browser without pressing Sign out is not recorded as a sign-out: that session simply ends after 6 hours. The internet address (IP) is not available here.</p></div>
+  </section>
+  <section id="v-s" style="display:none">
+   <div class="head"><h2>Settings</h2></div>
+   <div class="card" style="padding:20px;max-width:520px"><h3 style="margin-bottom:6px">Change my admin password</h3>
+    <input id="o1" type="password" placeholder="Current password"><input id="o2" type="password" placeholder="New password (10 or more characters)"><input id="o3" type="password" placeholder="New password again">
+    <button class="btn" onclick="chPw()">Change password</button>
+    <p class="mut" style="margin-top:12px">Business sign-in page for your customers:<br><code id="sl"></code></p></div>
+  </section>
+ </div>
+</div>
+
+<div class="modal" id="m-on"><div class="in" id="on-in">
+ <h2>Onboard a new business</h2><p class="mut">This creates the business's own private sheet and its Owner login. It takes about 15 seconds.</p>
+ <label>Business name</label><input id="on-n" placeholder="e.g. Inayat Afridi Perfumes">
+ <label>Owner's name</label><input id="on-o" placeholder="e.g. Inayat Afridi">
+ <label>Owner's username or email (their login)</label><input id="on-l" placeholder="e.g. inayat or inayat@gmail.com" autocapitalize="none">
+ <div class="row" style="margin-top:0"><div style="flex:1"><label>Plan</label><select id="on-s" onchange="$('on-d').value=this.value==='Trial'?14:365"><option value="Trial">Free trial</option><option value="Active">Paid (Active)</option></select></div><div style="flex:1"><label>Days of access</label><input id="on-d" type="number" min="1" value="14"></div></div>
+ <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-weight:500;margin-top:14px"><input type="checkbox" id="on-x" style="width:auto;margin:0"> Add sample services and staff (good for demos)</label>
+ <p class="err" id="on-e"></p>
+ <div class="row"><button class="btn" id="on-go" onclick="doOnboard()">Create business</button><button class="sm" onclick="closeM('m-on')">Cancel</button></div>
+</div></div>
+
+<div class="modal" id="m-edit"><div class="in">
+ <h2>Edit business</h2><input type="hidden" id="ed-i">
+ <label>Business name</label><input id="ed-n"><label>Owner's name</label><input id="ed-o"><label>Owner login (username or email)</label><input id="ed-l" autocapitalize="none">
+ <div class="row" style="margin-top:0"><div style="flex:1"><label>Status</label><select id="ed-s"><option>Active</option><option>Trial</option><option>Blocked</option></select></div><div style="flex:1"><label>Expires on</label><input id="ed-e" type="date"></div></div>
+ <p class="err" id="ed-er"></p><div class="row"><button class="btn" onclick="doEdit()">Save</button><button class="sm" onclick="closeM('m-edit')">Cancel</button></div>
+</div></div>
+
+<div class="modal" id="m-res"><div class="in"><h2 id="rs-t">Done</h2><div class="res" id="rs-b"></div><p class="mut" style="margin-top:8px">The temporary password is shown only now. Ask the owner to change it after signing in (My Password).</p>
+ <div class="row"><button class="btn" onclick="copyInvite()">Copy invite message</button><button class="sm green" onclick="waInvite()">Send on WhatsApp</button><button class="sm" onclick="closeM('m-res')">Close</button></div></div></div>
+
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbz1ie9kAKlxXkY39wLs8mRGUykUlHcue9Yo5YATcJ9wroP_58fZ6MeUGA3xGacsfdTW/exec';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let token=sessionStorage.getItem('adm')||'',list=[],busy=0,invite='';
+function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;t.style.transform='translate(-50%,0)';clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;t.style.transform='translate(-50%,20px)'},4200)}
+const bar=n=>{busy+=n;$('bar').style.opacity=busy>0?1:0};
+function dev(){const u=navigator.userAgent,os=/Android/.test(u)?'Android':/iPhone|iPad/.test(u)?'iOS':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':'Other',br=/Edg\//.test(u)?'Edge':/Chrome\//.test(u)?'Chrome':/Firefox\//.test(u)?'Firefox':/Safari\//.test(u)?'Safari':'Browser';return br+' on '+os}
+async function call(b){const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});return r.json()}
+async function api(a,d){bar(1);try{const r=await call(Object.assign({action:a,token},d||{}));if(!r.ok){if(/sign in again/i.test(r.error||''))signOut(true);throw new Error(r.error||'Something went wrong')}return r}finally{bar(-1)}}
+async function doLogin(){
+ $('lerr').textContent='Checking...';bar(1);
+ try{const r=await call({action:'adminLogin',username:$('u').value,password:$('p').value,device:dev()});
+  if(!r.ok){$('lerr').textContent=r.error;return}
+  token=r.token;sessionStorage.setItem('adm',token);$('p').value='';show()}
+ catch(e){$('lerr').textContent='Problem: '+e.message}finally{bar(-1)}
+}
+function signOut(quiet){try{fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'logout',token,device:dev()}),keepalive:true}).catch(()=>{})}catch(e){}sessionStorage.removeItem('adm');token='';setTimeout(()=>location.reload(),250)}
+function show(){$('login').style.display='none';$('app').style.display='block';$('sl').textContent=location.href.replace(/admin\.html.*$/,'index.html');loadTenants()}
+function tab(t){['b','l','s'].forEach(x=>{$('v-'+x).style.display=x===t?'block':'none';$('t-'+x).classList.toggle('on',x===t)});if(t==='l')loadLogs()}
+const stat=(s,days)=>`<span class="pill ${s}">${s}</span>`;
+async function loadTenants(){
+ try{list=(await api('adminTenants')).tenants;
+  const c=s=>list.filter(x=>x.status===s).length;
+  $('stats').innerHTML=`<div class="st"><small>Total</small><b>${list.length}</b></div><div class="st g"><small>Active</small><b>${c('Active')}</b></div><div class="st o"><small>Trial</small><b>${c('Trial')}</b></div><div class="st r"><small>Blocked / Expired</small><b>${c('Blocked')+c('Expired')}</b></div>`;
+  $('rows').innerHTML=list.map((t,i)=>`<tr><td class="id">${esc(t.id)}</td><td><b>${esc(t.name)}</b></td><td>${esc(t.owner)}<div class="mut">${esc(t.login)}</div></td><td>${stat(t.status)}</td><td>${esc(t.expiry||'No expiry')}<div class="mut">${t.daysLeft===null?'':t.daysLeft>=0?t.daysLeft+' days left':'ended '+(-t.daysLeft)+' days ago'}</div></td>
+   <td class="act">${t.status==='Blocked'?`<button class="sm green" onclick="setSt(${i},'Active')">Unblock</button>`:`<button class="sm red" onclick="setSt(${i},'Blocked')">Block</button>`}<button class="sm blue" onclick="ext(${i},30)">+30d</button><button class="sm blue" onclick="ext(${i},365)">+1yr</button><button class="sm" onclick="openEdit(${i})">Edit</button><button class="sm" onclick="reset(${i})">Reset password</button><a href="${esc(t.sheetUrl)}" target="_blank" rel="noopener"><button class="sm">Open data</button></a><button class="sm" onclick="logsOf(${i})">Logs</button></td></tr>`).join('')||'<tr><td colspan="6" class="mut" style="text-align:center;padding:30px">No businesses yet. Click "Onboard new business".</td></tr>';
+ }catch(e){toast(e.message)}
+}
+async function setSt(i,s){const t=list[i];if(s==='Blocked'&&!confirm('Block '+t.name+'? All of its users are signed out straight away.'))return;try{await api('adminStatus',{id:t.id,status:s});toast(t.name+(s==='Blocked'?' is blocked':' is unblocked'));loadTenants()}catch(e){toast(e.message)}}
+async function ext(i,d){try{const r=await api('adminExtend',{id:list[i].id,days:d});toast('Access now runs until '+r.expiry);loadTenants()}catch(e){toast(e.message)}}
+function openM(id){$(id).style.display='flex'}function closeM(id){$(id).style.display='none'}
+function openOnboard(){['on-n','on-o','on-l'].forEach(i=>$(i).value='');$('on-s').value='Trial';$('on-d').value=14;$('on-x').checked=false;$('on-e').textContent='';$('on-go').disabled=false;$('on-go').textContent='Create business';openM('m-on')}
+function inviteText(id,name,login,pass){const url=location.href.replace(/admin\.html.*$/,'index.html');return 'Welcome to '+name+'!\nSign in here: '+url+'\nBusiness ID: '+id+'\nUsername: '+login+'\nTemporary password: '+pass+'\nPlease change your password after signing in (menu > My Password).'}
+async function doOnboard(){
+ $('on-e').textContent='';const b=$('on-go');b.disabled=true;b.textContent='Creating... please wait';
+ try{const r=await api('adminOnboard',{name:$('on-n').value,ownerName:$('on-o').value,login:$('on-l').value,status:$('on-s').value,days:$('on-d').value,sample:$('on-x').checked});
+  closeM('m-on');invite=inviteText(r.business.id,r.business.name,r.login,r.tempPassword);
+  $('rs-t').textContent='Business created';$('rs-b').innerHTML=`Business ID: <code>${esc(r.business.id)}</code><br>Username: <code>${esc(r.login)}</code><br>Temporary password: <code>${esc(r.tempPassword)}</code><br>Access until: <code>${esc(r.expiry)}</code> (${esc(r.status)})`;openM('m-res');loadTenants()}
+ catch(e){$('on-e').textContent=e.message;b.disabled=false;b.textContent='Create business'}
+}
+function openEdit(i){const t=list[i];$('ed-i').value=t.id;$('ed-n').value=t.name;$('ed-o').value=t.owner;$('ed-l').value=t.login;$('ed-s').value=t.rawStatus;$('ed-e').value=t.expiry;$('ed-er').textContent='';openM('m-edit')}
+async function doEdit(){try{await api('adminEdit',{id:$('ed-i').value,name:$('ed-n').value,owner:$('ed-o').value,login:$('ed-l').value,status:$('ed-s').value,expiry:$('ed-e').value});closeM('m-edit');toast('Saved');loadTenants()}catch(e){$('ed-er').textContent=e.message}}
+async function reset(i){const t=list[i];if(!confirm('Reset the Owner password of '+t.name+'? The Owner is signed out and gets a new temporary password.'))return;
+ try{const r=await api('adminResetOwner',{id:t.id});invite=inviteText(t.id,t.name,r.login,r.tempPassword);$('rs-t').textContent='Password reset';$('rs-b').innerHTML=`Business ID: <code>${esc(t.id)}</code><br>Username: <code>${esc(r.login)}</code><br>New temporary password: <code>${esc(r.tempPassword)}</code>`;openM('m-res')}catch(e){toast(e.message)}}
+function copyInvite(){(navigator.clipboard?navigator.clipboard.writeText(invite):Promise.reject()).then(()=>toast('Invite message copied')).catch(()=>{prompt('Copy this message:',invite)})}
+function waInvite(){window.open('https://wa.me/?text='+encodeURIComponent(invite),'_blank')}
+function logsOf(i){tab('l');$('lb').value=list[i].id;loadLogs()}
+async function loadLogs(){
+ const cur=$('lb').value;$('lb').innerHTML='<option value="">All businesses</option><option value="PLATFORM">Platform admin</option>'+list.map(t=>`<option value="${esc(t.id)}">${esc(t.id)} - ${esc(t.name)}</option>`).join('');$('lb').value=cur;
+ try{const r=await api('adminLogs',{businessId:$('lb').value,event:$('le').value,limit:200});
+  $('lrows').innerHTML=r.logs.map(x=>`<tr><td>${esc(x.time)}</td><td class="id">${esc(x.business)}</td><td>${esc(x.user)}</td><td>${esc(x.role)}</td><td><span class="pill ${/Failed|Blocked/.test(x.event)?'Blocked':/Login/.test(x.event)?'Active':'Trial'}">${esc(x.event)}</span></td><td class="mut">${esc(x.device)}</td></tr>`).join('')||'<tr><td colspan="6" class="mut" style="text-align:center;padding:24px">No activity yet.</td></tr>'}catch(e){toast(e.message)}
+}
+async function purge(){if(!confirm('Delete all log entries older than 90 days?'))return;try{const r=await api('adminPurgeLogs',{days:90});toast(r.removed+' old entries deleted');loadLogs()}catch(e){toast(e.message)}}
+async function chPw(){if($('o2').value!==$('o3').value)return toast('The two new passwords are not the same');try{await api('adminChangePassword',{oldPassword:$('o1').value,newPassword:$('o2').value});['o1','o2','o3'].forEach(i=>$(i).value='');toast('Password changed')}catch(e){toast(e.message)}}
+if(token){show()}
+</script></body></html>
