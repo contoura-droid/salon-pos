@@ -51,7 +51,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}t
 
 <div id="login"><div class="box">
  <div class="logo">&#127970;</div><h1>Business Portal</h1><small>PLATFORM ADMINISTRATOR</small>
- <label>Admin username</label><input id="u" autocomplete="username" autocapitalize="none">
+ <label>Admin username</label><input id="u" name="platform-admin-user" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="The admin username you set up">
  <label>Password</label><input id="p" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
  <button class="btn" style="width:100%;margin-top:16px" onclick="doLogin()">Sign in &rarr;</button>
  <p class="err" id="lerr"></p>
